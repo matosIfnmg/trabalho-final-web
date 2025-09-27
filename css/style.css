@@ -1,0 +1,170 @@
+/* --- CSS Reset e Definições Globais --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    color: #333;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* --- Header --- */
+header {
+    background-color: #f8f8f8;
+    padding: 20px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header .logo a {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+header nav ul {
+    display: flex;
+    gap: 20px;
+}
+
+header .header-icons {
+    display: flex;
+    gap: 20px;
+}
+
+/* --- Hero Section --- */
+.hero {
+    background-color: #eeeeee; /* Cor do placeholder */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.hero-content h1 {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.hero-content p {
+    font-size: 20px;
+    margin-bottom: 30px;
+}
+
+.cta-button {
+    background-color: #333;
+    color: #fff;
+    padding: 15px 30px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+/* --- Featured Products --- */
+.featured-products {
+    padding: 60px 0;
+    text-align: center;
+}
+
+.featured-products h2 {
+    font-size: 36px;
+    margin-bottom: 40px;
+}
+
+.product-grid {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+.product-card {
+    text-align: center;
+}
+
+.product-card img {
+    width: 300px;
+    height: 300px;
+    background-color: #eeeeee; /* Cor do placeholder */
+    margin-bottom: 15px;
+}
+
+.product-card h3 {
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+/* --- About Section --- */
+.about-section {
+    background-color: #f8f8f8;
+    padding: 60px 0;
+}
+
+.about-section .container {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+}
+
+.about-image img {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%; /* Deixa a imagem redonda */
+    background-color: #ccc; /* Cor do placeholder */
+}
+
+.about-text h2 {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+.about-text p {
+    margin-bottom: 30px;
+}
+
+/* --- Footer --- */
+footer {
+    background-color: #333;
+    color: #fff;
+    padding-top: 40px;
+}
+
+.footer-columns {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    padding-bottom: 40px;
+}
+
+.footer-col ul {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-bottom {
+    border-top: 1px solid #555;
+    text-align: center;
+    padding: 20px 0;
+}
