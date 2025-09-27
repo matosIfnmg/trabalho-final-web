@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrinho de Compras - VF Amigurumis</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <div class="logo"><a href="index.html">VF Amigurumis</a></div>
+            <nav>
+                <ul>
+                    <li><a href="loja.html">Loja</a></li>
+                    <li><a href="sobre.html">Sobre</a></li>
+                    <li><a href="portfolio.html">Portfolio</a></li>
+                    <li><a href="contato.html">Contato</a></li>
+                </ul>
+            </nav>
+            <div class="header-icons">
+                <a href="carrinho.html">Carrinho</a>
+                <a href="admin/login.html">Login</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1>Meu Carrinho</h1>
+        <div class="cart-layout">
+            <section class="cart-items">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Preço</th>
+                            <th>Quantidade</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="product-info-cell">
+                                    <div class="image-placeholder small"><span>Polvo Zezinho</span></div>
+                                    <span>Polvo Zezinho</span>
+                                </div>
+                            </td>
+                            <td>R$ 89,90</td>
+                            <td><input type="number" value="1" min="1"></td>
+                            <td>R$ 89,90</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="product-info-cell">
+                                    <div class="image-placeholder small"><span>Mascote Galo</span></div>
+                                    <span>Mascote Galo</span>
+                                </div>
+                            </td>
+                            <td>R$ 89,90</td>
+                            <td><input type="number" value="1" min="1"></td>
+                            <td>R$ 89,90</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <aside class="order-summary">
+                <h2>Resumo do Pedido</h2>
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span>R$ 179,80</span>
+                </div>
+                <div class="summary-row">
+                    <span>Frete:</span>
+                    <span>A calcular</span>
+                </div>
+                <div class="summary-total">
+                    <span>Total:</span>
+                    <span>R$ 179,80</span>
+                </div>
+                <a href="checkout.html" class="cta-button">Finalizar Compra</a>
+            </aside>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-columns container">
+            <div class="footer-col"><h3>Mapa do Site</h3><ul><li><a href="loja.html">Loja</a></li><li><a href="sobre.html">Sobre</a></li><li><a href="contato.html">Contato</a></li><li><a href="portfolio.html">Portfolio</a></li></ul></div>
+            <div class="footer-col"><h3>Contato</h3><p>seunome@email.com</p><p>(XX) XXXXXXXXX</p></div>
+            <div class="footer-col"><h3>Siga-nos</h3><div class="social-icons"></div></div>
+        </div>
+        <div class="footer-bottom"><p>© 2025 VF Amigurumis. Todos os direitos reservados.</p></div>
+    </footer>
+
+</body>
+</html>
