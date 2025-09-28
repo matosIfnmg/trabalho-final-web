@@ -593,7 +593,7 @@ main > h1 {
     .hero-content h1 {
         font-size: 36px;
     }
-    .featured-products h2, .about-text h2, .full-product-grid h2, .product-info h1 {
+    .featured-products h2, .about-text h2, .full-product-grid h2, .product-info h1, .about-hero h1 {
         font-size: 28px;
     }
 
@@ -602,7 +602,8 @@ main > h1 {
     .shop-layout,
     .product-details-layout,
     .cart-layout,
-    .footer-columns {
+    .footer-columns,
+    .about-intro {
         flex-direction: column;
         text-align: center;
     }
@@ -620,5 +621,10 @@ main > h1 {
 
     .contact-options {
         grid-template-columns: 1fr;
+    }
+    
+    /* Vitoria, aqui está a correção para a página Sobre no mobile */
+    .about-intro-text {
+        text-align: center;
     }
 }
