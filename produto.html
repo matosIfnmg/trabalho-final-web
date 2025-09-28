@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
     <header>
         <div class="container">
             <div class="logo"><a href="index.html">VF Amigurumis</a></div>
@@ -27,21 +26,27 @@
                 </div>
             </section>
 
-            <section class="product-info">
+            <section class="product-info" data-product-id="1" data-product-name="Polvo Zezinho de Crochê" data-product-price="89.90">
                 <h1>Polvo Zezinho de Crochê</h1>
                 <p class="price">R$ 89,90</p>
                 <p class="description">Descrição detalhada do Polvo Zezinho, feito com materiais de alta qualidade, perfeito para presentear.</p>
-                
                 <div class="quantity-selector">
-                    <button>-</button>
-                    <input type="text" value="1" readonly>
-                    <button>+</button>
+                    <button id="decrease-quantity">-</button>
+                    <input type="text" id="quantity" value="1" readonly>
+                    <button id="increase-quantity">+</button>
                 </div>
-
-                <a href="carrinho.html" class="cta-button">Adicionar ao Carrinho</a>
+                <button id="add-to-cart-btn" class="cta-button">Adicionar ao Carrinho</button>
             </section>
         </div>
     </main>
+
+    <div id="add-to-cart-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <p>Produto adicionado ao carrinho!</p>
+            <a href="carrinho.html" class="cta-button">Ver Carrinho</a>
+            <button id="continue-shopping-btn" class="secondary-button">Continuar Navegando</button>
+        </div>
+    </div>
 
     <footer>
         <div class="footer-columns container">
@@ -52,5 +57,6 @@
         <div class="footer-bottom"><p>© 2025 VF Amigurumis. Todos os direitos reservados.</p></div>
     </footer>
 
+    <script src="js/main.js"></script>
 </body>
 </html>

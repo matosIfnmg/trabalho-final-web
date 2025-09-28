@@ -244,6 +244,7 @@ footer {
 .shop-layout {
     display: flex;
     gap: 40px;
+    align-items: flex-start;
 }
 
 .filters {
@@ -267,15 +268,27 @@ footer {
 
 .full-product-grid {
     flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
 .full-product-grid h2 {
     font-size: 36px;
     margin-bottom: 20px;
     text-align: center;
+}
+
+.price-slider {
+    padding-top: 10px;
+}
+
+.price-slider .slider {
+    width: 100%;
+    cursor: pointer;
+}
+
+.price-slider .price-value {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
 }
 
 /* --- Página de Detalhes do Produto --- */
@@ -462,11 +475,10 @@ main > h1 {
 .contact-card h3 { font-size: 24px; margin-bottom: 10px; }
 
 
-/* --- Vitoria, aqui começa o estilo da Página de Checkout --- */
-
+/* --- Página de Checkout --- */
 .checkout-page {
     max-width: 800px;
-    margin: 0 auto; /* Centraliza o conteúdo da página */
+    margin: 0 auto;
     text-align: center;
 }
 
@@ -493,7 +505,7 @@ main > h1 {
 .whatsapp-button {
     padding: 20px 40px;
     font-size: 20px;
-    background-color: #25D366; /* Cor do WhatsApp */
+    background-color: #25D366;
 }
 
 .whatsapp-button:hover {

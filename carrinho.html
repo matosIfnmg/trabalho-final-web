@@ -26,58 +26,28 @@
                             <th>Preço</th>
                             <th>Quantidade</th>
                             <th>Total</th>
-                            <th></th> </tr>
+                            <th></th>
+                        </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <div class="product-info-cell">
-                                    <div class="image-placeholder small"><span>Polvo Zezinho</span></div>
-                                    <span>Polvo Zezinho</span>
-                                </div>
-                            </td>
-                            <td>R$ 89,90</td>
-                            <td>
-                                <div class="quantity-selector">
-                                    <button>-</button>
-                                    <input type="text" value="1" readonly>
-                                    <button>+</button>
-                                </div>
-                            </td>
-                            <td>R$ 89,90</td>
-                            <td>
-                                <button class="remove-btn">X</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="product-info-cell">
-                                    <div class="image-placeholder small"><span>Mascote Galo</span></div>
-                                    <span>Mascote Galo</span>
-                                </div>
-                            </td>
-                            <td>R$ 89,90</td>
-                            <td>
-                                <div class="quantity-selector">
-                                    <button>-</button>
-                                    <input type="text" value="1" readonly>
-                                    <button>+</button>
-                                </div>
-                            </td>
-                            <td>R$ 89,90</td>
-                            <td>
-                                <button class="remove-btn">X</button>
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tbody id="cart-item-list">
+                        </tbody>
                 </table>
             </section>
 
             <aside class="order-summary">
                 <h2>Resumo do Pedido</h2>
-                <div class="summary-row"><span>Subtotal:</span><span>R$ 179,80</span></div>
-                <div class="summary-row"><span>Frete:</span><span>A calcular</span></div>
-                <div class="summary-total"><span>Total:</span><span>R$ 179,80</span></div>
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">R$ 0,00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Frete:</span>
+                    <span>A calcular</span>
+                </div>
+                <div class="summary-total">
+                    <span>Total:</span>
+                    <span id="total">R$ 0,00</span>
+                </div>
                 <a href="checkout.html" class="cta-button">Finalizar Compra</a>
             </aside>
         </div>
@@ -91,5 +61,7 @@
         </div>
         <div class="footer-bottom"><p>© 2025 VF Amigurumis. Todos os direitos reservados.</p></div>
     </footer>
+
+    <script src="js/main.js"></script>
 </body>
 </html>
