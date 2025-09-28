@@ -7,15 +7,31 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
     <header>
         <div class="container">
             <div class="logo"><a href="index.html">VF Amigurumis</a></div>
-            <nav><ul><li><a href="loja.html">Loja</a></li><li><a href="sobre.html">Sobre</a></li><li><a href="contato.html">Contato</a></li></ul></nav>
-            <div class="header-icons"><a href="carrinho.html">Carrinho</a><a href="admin/login.html">Login</a></div>
+            <nav>
+                <ul>
+                    <li><a href="loja.html">Loja</a></li>
+                    <li><a href="sobre.html">Sobre</a></li>
+                    <li><a href="contato.html">Contato</a></li>
+                </ul>
+            </nav>
+            <div class="header-icons">
+                <a href="carrinho.html">Carrinho</a>
+                <a href="admin/login.html">Login</a>
+            </div>
         </div>
     </header>
 
     <main class="container">
+        <nav class="breadcrumbs">
+            <a href="index.html">Início</a> / 
+            <a href="loja.html">Loja</a> / 
+            <span>Polvo Zezinho de Crochê</span>
+        </nav>
+
         <div class="product-details-layout">
             <section class="product-gallery">
                 <div class="image-placeholder main-image"><span>Polvo Zezinho</span></div>
@@ -29,12 +45,16 @@
             <section class="product-info" data-product-id="1" data-product-name="Polvo Zezinho de Crochê" data-product-price="89.90">
                 <h1>Polvo Zezinho de Crochê</h1>
                 <p class="price">R$ 89,90</p>
-                <p class="description">Descrição detalhada do Polvo Zezinho, feito com materiais de alta qualidade, perfeito para presentear.</p>
+                <p class="description">
+                    Descrição detalhada do Polvo Zezinho, feito com materiais de alta qualidade, perfeito para presentear.
+                </p>
+                
                 <div class="quantity-selector">
                     <button id="decrease-quantity">-</button>
                     <input type="text" id="quantity" value="1" readonly>
                     <button id="increase-quantity">+</button>
                 </div>
+
                 <button id="add-to-cart-btn" class="cta-button">Adicionar ao Carrinho</button>
             </section>
         </div>
