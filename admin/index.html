@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="admin-layout">
-        <aside class="sidebar">
+        <aside class="sidebar" id="admin-sidebar">
             <div class="sidebar-header">
                 <h2>VF Amigurumis</h2>
             </div>
@@ -24,10 +24,13 @@
                 <a href="login.html" class="sidebar-link">Sair</a>
             </div>
         </aside>
+
         <main class="main-content">
             <header class="main-header">
+                <button class="hamburger-menu admin-hamburger" aria-label="Abrir menu">☰</button>
                 <h1>Dashboard</h1>
             </header>
+            
             <div class="content">
                 <section class="kpi-cards">
                     <a href="adicionar-produto.html" class="card-link"><div class="card"><h3>Ação Rápida</h3><p>+ Adicionar Produto</p></div></a>
@@ -47,5 +50,6 @@
             </div>
         </main>
     </div>
+    <script src="../js/admin.js"></script>
 </body>
 </html>

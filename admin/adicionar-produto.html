@@ -8,12 +8,13 @@
 </head>
 <body>
     <div class="admin-layout">
-        <aside class="sidebar">
+        <aside class="sidebar" id="admin-sidebar">
             <div class="sidebar-header">
                 <h2>VF Amigurumis</h2>
             </div>
             <nav>
                 <ul>
+                    <li><a href="index.html">Dashboard</a></li>
                     <li><a href="produtos.html" class="active">Produtos</a></li>
                     <li><a href="#">Configurações</a></li>
                 </ul>
@@ -26,58 +27,25 @@
 
         <main class="main-content">
             <header class="main-header">
+                <button class="hamburger-menu admin-hamburger" aria-label="Abrir menu">☰</button>
                 <h1>Adicionar Novo Produto</h1>
             </header>
             
             <div class="content">
                 <form class="product-form">
                     <div class="form-main">
-                        <div class="form-group">
-                            <label for="nome">Nome do Produto</label>
-                            <input type="text" id="nome" placeholder="Ex: Polvo Zezinho" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="descricao">Descrição</label>
-                            <textarea id="descricao" rows="10" placeholder="Descreva o produto, materiais, tamanho, etc."></textarea>
-                        </div>
+                        <div class="form-group"><label for="nome">Nome do Produto</label><input type="text" id="nome" placeholder="Ex: Polvo Zezinho" required></div>
+                        <div class="form-group"><label for="descricao">Descrição</label><textarea id="descricao" rows="10" placeholder="Descreva o produto, materiais, tamanho, etc."></textarea></div>
                         <div class="form-row">
-                            <div class="form-group">
-                                <label for="preco">Preço (R$)</label>
-                                <input type="text" id="preco" placeholder="Ex: 89.90">
-                            </div>
-                            <div class="form-group">
-                                <label for="estoque">Estoque</label>
-                                <input type="number" id="estoque" value="1" min="0">
-                            </div>
+                            <div class="form-group"><label for="preco">Preço (R$)</label><input type="text" id="preco" placeholder="Ex: 89.90"></div>
+                            <div class="form-group"><label for="estoque">Estoque</label><input type="number" id="estoque" value="1" min="0"></div>
                         </div>
                     </div>
                     <div class="form-sidebar">
-                        <div class="form-group">
-                            <label>Imagem Principal</label>
-                            <div class="image-upload-placeholder">
-                                Clique para selecionar
-                            </div>
-                        </div>
-                         <div class="form-group">
-                            <label>Imagens Secundárias</label>
-                            <div class="image-upload-placeholder small">
-                                Selecionar
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Categorias</label>
-                            <div class="category-tags">
-                                <span>Animais</span>
-                                <span>Personagens</span>
-                            </div>
-                        </div>
-                         <div class="form-group">
-                            <label>Status</label>
-                            <select id="status">
-                                <option value="ativo">Ativo</option>
-                                <option value="inativo">Inativo</option>
-                            </select>
-                        </div>
+                        <div class="form-group"><label>Imagem Principal</label><div class="image-upload-placeholder">Clique para selecionar</div></div>
+                        <div class="form-group"><label>Imagens Secundárias</label><div class="image-upload-placeholder small">Selecionar</div></div>
+                        <div class="form-group"><label>Categorias</label><div class="category-tags"><span>Animais</span><span>Personagens</span></div></div>
+                        <div class="form-group"><label>Status</label><select id="status"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select></div>
                     </div>
                 </form>
                 <div class="form-actions">

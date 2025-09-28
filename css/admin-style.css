@@ -40,6 +40,7 @@ a {
 .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
 .main-header h1 { margin: 0; font-size: 32px; }
 .content { background-color: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+.hamburger-menu.admin-hamburger { display: none; } /* Esconde o hambúrguer no desktop */
 
 /* --- Estilo da Página de Produtos --- */
 .add-button { background-color: #d9534f; color: #fff; padding: 10px 20px; border-radius: 5px; font-weight: bold; text-decoration: none; }
@@ -66,3 +67,40 @@ a {
 .form-actions { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; display: flex; align-items: center; gap: 15px; }
 .save-button { background-color: #5cb85c; color: #fff; padding: 12px 25px; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
 .cancel-link { color: #777; text-decoration: underline; font-weight: bold; }
+
+/* --- Vitoria, aqui começa a responsividade do painel admin --- */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        left: -250px; /* Começa escondido fora da tela */
+        height: 100%;
+        z-index: 1000;
+        transition: left 0.3s ease-in-out;
+    }
+
+    .sidebar.active {
+        left: 0; /* Mostra o menu */
+    }
+
+    .main-content {
+        width: 100%; /* Força o conteúdo principal a ocupar toda a largura */
+        padding: 15px;
+    }
+    
+    .hamburger-menu.admin-hamburger {
+        display: block;
+        color: #333;
+        font-size: 28px;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .table-container {
+        overflow-x: auto; /* Adiciona scroll horizontal na tabela */
+    }
+
+    .product-form {
+        flex-direction: column;
+    }
+}
