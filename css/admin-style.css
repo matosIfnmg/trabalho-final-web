@@ -1,0 +1,68 @@
+/* --- Estilo Base --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* --- Página de Login --- */
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+.login-container form { background-color: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; font-weight: bold; }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; font-family: inherit; }
+.login-button { display: block; width: 100%; padding: 15px; background-color: #333; color: #fff; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; text-align: center; cursor: pointer; text-decoration: none; }
+
+/* --- Estrutura Principal do Painel Admin --- */
+.admin-layout { display: flex; }
+.sidebar { width: 250px; background-color: #333; color: #fff; height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; }
+.sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid #444; }
+.sidebar-header h2 { margin: 0; }
+.sidebar nav ul { list-style: none; padding: 0; margin: 0; }
+.sidebar nav a { display: block; padding: 15px 20px; color: #fff; text-decoration: none; border-bottom: 1px solid #444; transition: background-color 0.3s; }
+.sidebar nav a:hover, .sidebar nav a.active { background-color: #555; }
+.sidebar-footer { margin-top: auto; border-top: 1px solid #444; }
+.sidebar-footer a.sidebar-link { display: block; padding: 15px 20px; color: #ccc; text-decoration: none; }
+.sidebar-footer a.sidebar-link:hover { background-color: #444; color: #fff; }
+.main-content { flex-grow: 1; padding: 30px; overflow-y: auto; height: 100vh; }
+.main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+.main-header h1 { margin: 0; font-size: 32px; }
+.content { background-color: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+/* --- Estilo da Página de Produtos --- */
+.add-button { background-color: #d9534f; color: #fff; padding: 10px 20px; border-radius: 5px; font-weight: bold; text-decoration: none; }
+.table-container table { width: 100%; border-collapse: collapse; }
+.table-container th, .table-container td { padding: 15px; border-bottom: 1px solid #eee; text-align: left; vertical-align: middle; }
+.table-container thead { background-color: #f8f8f8; }
+.table-image-placeholder { width: 60px; height: 60px; background-color: #f0f0f0; border-radius: 5px; }
+.action-btn { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-right: 5px; text-decoration: none; display: inline-block; }
+.action-btn.edit { background-color: #f0ad4e; color: #fff; }
+.action-btn.delete { background-color: #d9534f; color: #fff; }
+.status { padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; }
+.status.active { background-color: #dff0d8; color: #3c763d; }
+.status.inactive { background-color: #f2dede; color: #a94442; }
+
+/* --- Estilo da Página de Adicionar/Editar Produto --- */
+.product-form { display: flex; gap: 30px; }
+.form-main { flex: 2; }
+.form-sidebar { flex: 1; }
+.form-row { display: flex; gap: 20px; }
+.form-row .form-group { flex: 1; }
+.image-upload-placeholder { border: 2px dashed #ddd; border-radius: 5px; padding: 40px 20px; text-align: center; color: #999; cursor: pointer; }
+.image-upload-placeholder.small { padding: 20px; font-size: 14px; }
+.category-tags span { display: inline-block; background-color: #eee; padding: 5px 10px; border-radius: 5px; margin-right: 5px; font-size: 14px; }
+.form-actions { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; display: flex; align-items: center; gap: 15px; }
+.save-button { background-color: #5cb85c; color: #fff; padding: 12px 25px; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
+.cancel-link { color: #777; text-decoration: underline; font-weight: bold; }

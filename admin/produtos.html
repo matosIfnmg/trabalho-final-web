@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos - Painel Administrativo</title>
+    <link rel="stylesheet" href="../css/admin-style.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>VF Amigurumis</h2>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Dashboard</a></li>
+                    <li><a href="produtos.html" class="active">Produtos</a></li>
+                    <li><a href="#">Configurações</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="../index.html" target="_blank" class="sidebar-link">Ver Site</a>
+                <a href="login.html" class="sidebar-link">Sair</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Produtos</h1>
+                <a href="adicionar-produto.html" class="add-button">+ Adicionar Novo Produto</a>
+            </header>
+            
+            <div class="content">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Imagem</th>
+                                <th>Nome do Produto</th>
+                                <th>Preço</th>
+                                <th>Estoque</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><div class="table-image-placeholder"></div></td>
+                                <td>Polvo Zezinho</td>
+                                <td>R$ 89,90</td>
+                                <td>10</td>
+                                <td><span class="status active">Ativo</span></td>
+                                <td>
+                                    <a href="editar-produto.html" class="action-btn edit">Editar</a>
+                                    <button class="action-btn delete">Excluir</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><div class="table-image-placeholder"></div></td>
+                                <td>Mascote Galo</td>
+                                <td>R$ 89,90</td>
+                                <td>5</td>
+                                <td><span class="status active">Ativo</span></td>
+                                <td>
+                                    <a href="editar-produto.html" class="action-btn edit">Editar</a>
+                                    <button class="action-btn delete">Excluir</button>
+                                </td>
+                            </tr>
+                             <tr>
+                                <td><div class="table-image-placeholder"></div></td>
+                                <td>Ns. Aparecida</td>
+                                <td>R$ 120,00</td>
+                                <td>3</td>
+                                <td><span class="status inactive">Inativo</span></td>
+                                <td>
+                                    <a href="editar-produto.html" class="action-btn edit">Editar</a>
+                                    <button class="action-btn delete">Excluir</button>
+                                </td>
+                            </tr>
+                             <tr>
+                                <td><div class="table-image-placeholder"></div></td>
+                                <td>Chaveiro Coração</td>
+                                <td>R$ 25,00</td>
+                                <td>25</td>
+                                <td><span class="status active">Ativo</span></td>
+                                <td>
+                                    <a href="editar-produto.html" class="action-btn edit">Editar</a>
+                                    <button class="action-btn delete">Excluir</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="../js/admin.js"></script>
+</body>
+</html>
