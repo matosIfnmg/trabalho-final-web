@@ -70,6 +70,10 @@ header .logo a {
     color: #333;
 }
 
+header nav {
+    display: block; 
+}
+
 header nav ul {
     display: flex;
     gap: 30px;
@@ -81,8 +85,16 @@ header nav a {
 }
 
 header .header-icons {
-    display: flex;
+    display: flex; 
     gap: 20px;
+}
+
+.hamburger-menu {
+    display: none; 
+    font-size: 28px;
+    background: none;
+    border: none;
+    cursor: pointer;
 }
 
 /* --- Hero Section --- */
@@ -481,6 +493,37 @@ main > h1 {
     text-align: center;
 }
 
+.checkout-instructions {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 40px;
+}
+
+.final-order-summary {
+    background-color: #f8f8f8;
+    padding: 30px;
+    border-radius: 8px;
+    text-align: left;
+    margin-bottom: 40px;
+    border: 1px solid #eee;
+}
+
+.final-order-summary h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.whatsapp-button {
+    padding: 20px 40px;
+    font-size: 20px;
+    background-color: #25D366;
+}
+
+.whatsapp-button:hover {
+    background-color: #128C7E;
+    color: #fff;
+}
+
 /* --- Modal de Confirmação --- */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000;
@@ -505,20 +548,45 @@ main > h1 {
 /* --- Vitoria, aqui começa o código para a responsividade (celular) --- */
 @media (max-width: 768px) {
 
+    .container {
+        width: 95%;
+    }
+
     /* Ajusta o layout do Header para celular */
     header .container {
-        flex-direction: column;
-        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: space-between;
     }
 
     header nav {
-        width: 100%;
-        overflow-x: auto;
+        display: none;
+        order: 3; 
+        width: 100%; 
+        margin-top: 15px;
+    }
+
+    header nav.active {
+        display: block;
     }
 
     header nav ul {
-        justify-content: center;
-        flex-wrap: nowrap;
+        flex-direction: column;
+        gap: 0;
+    }
+     header nav a {
+        display: block;
+        padding: 15px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+     }
+
+    .hamburger-menu {
+        display: block;
+        order: 2;
+    }
+
+    .header-icons {
+        display: none;
     }
 
     /* Ajusta os títulos para telas menores */
@@ -538,9 +606,11 @@ main > h1 {
         flex-direction: column;
         text-align: center;
     }
-
-    .product-gallery, .product-info {
+    
+    .product-gallery, .product-info, .cart-items, .order-summary {
         max-width: 100%;
+        flex: none;
+        width: 100%;
     }
     
     .filters {
