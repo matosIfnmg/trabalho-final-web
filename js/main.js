@@ -1,9 +1,18 @@
-// Vitoria, este é o código final e corrigido para a interatividade do site.
+// Vitoria, este é o código final e completo para toda a interatividade do site.
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 1. LÓGICA DA PÁGINA DE PRODUTO ---
-    // Procura por elementos que só existem na página de produto
+    // --- 1. LÓGICA DO MENU HAMBÚRGUER (para todas as páginas) ---
+    const hamburgerBtn = document.querySelector('.hamburger-menu');
+    const mainNav = document.getElementById('main-nav');
+
+    if (hamburgerBtn && mainNav) {
+        hamburgerBtn.addEventListener('click', () => {
+            mainNav.classList.toggle('active');
+        });
+    }
+
+    // --- 2. LÓGICA DA PÁGINA DE PRODUTO ---
     const addToCartBtn = document.getElementById('add-to-cart-btn');
     if (addToCartBtn) {
         const quantityInput = document.getElementById('quantity');
@@ -12,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById('add-to-cart-modal');
         const continueShoppingBtn = document.getElementById('continue-shopping-btn');
 
-        // Funcionalidade do seletor de quantidade
         increaseBtn.addEventListener('click', () => {
             quantityInput.value = parseInt(quantityInput.value) + 1;
         });
@@ -23,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Funcionalidade de adicionar ao carrinho e mostrar a janela
         addToCartBtn.addEventListener('click', () => {
             const productInfoEl = document.querySelector('.product-info');
             const product = {
@@ -37,26 +44,23 @@ document.addEventListener('DOMContentLoaded', () => {
             cart.push(product);
             localStorage.setItem('cart', JSON.stringify(cart));
             
-            modal.style.display = 'flex'; // Mostra a janela de confirmação
+            modal.style.display = 'flex';
         });
 
-        // Funcionalidade de fechar a janela
         continueShoppingBtn.addEventListener('click', () => {
             modal.style.display = 'none';
         });
     }
 
-    // --- 2. LÓGICA DA PÁGINA DO CARRINHO ---
-    // Procura por elementos que só existem na página do carrinho
+    // --- 3. LÓGICA DA PÁGINA DO CARRINHO ---
     const cartItemList = document.getElementById('cart-item-list');
     if (cartItemList) {
         const subtotalEl = document.getElementById('subtotal');
         const totalEl = document.getElementById('total');
 
-        // Função para desenhar os itens do carrinho na tela
         const renderCart = () => {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            cartItemList.innerHTML = ''; // Limpa a tabela
+            cartItemList.innerHTML = '';
 
             if (cart.length === 0) {
                 cartItemList.innerHTML = `<tr><td colspan="5" class="empty-cart-message"><p>Seu carrinho está vazio.</p><a href="loja.html" class="cta-button">Ver a Loja</a></td></tr>`;
@@ -83,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
             totalEl.textContent = `R$ ${subtotal.toFixed(2)}`;
         };
 
-        // Eventos para os botões de +/- e remover DENTRO do carrinho
         cartItemList.addEventListener('click', (event) => {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const index = parseInt(event.target.dataset.index);
@@ -102,11 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
             renderCart();
         });
 
-        renderCart(); // Desenha o carrinho assim que a página carrega
+        renderCart();
     }
 
-    // --- 3. LÓGICA DA PÁGINA DA LOJA ---
-    // Procura por elementos que só existem na página da loja
+    // --- 4. LÓGICA DA PÁGINA DA LOJA ---
     const priceSlider = document.getElementById('price-slider');
     if (priceSlider) {
         const priceValue = document.getElementById('price-value');
@@ -115,5 +117,41 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         priceSlider.addEventListener('input', updatePriceValue);
         updatePriceValue();
+    }
+
+    // --- 5. LÓGICA DA PÁGINA DE CHECKOUT ---
+    const checkoutSummaryItems = document.getElementById('checkout-summary-items');
+    if (checkoutSummaryItems) {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const checkoutTotalEl = document.getElementById('checkout-total');
+        const whatsappButton = document.getElementById('whatsapp-button');
+        let total = 0;
+        let whatsappMessage = 'Olá! Tenho interesse nos seguintes produtos:\n';
+
+        if (cart.length === 0) {
+            checkoutSummaryItems.innerHTML = '<p style="text-align:center;">Seu carrinho está vazio. Volte para a loja para adicionar produtos.</p>';
+            whatsappButton.style.display = 'none'; // Esconde o botão se não houver itens
+        } else {
+            cart.forEach(product => {
+                const itemTotal = product.price * product.quantity;
+                total += itemTotal;
+                
+                const summaryRow = document.createElement('div');
+                summaryRow.classList.add('summary-row');
+                summaryRow.innerHTML = `
+                    <span>${product.quantity}x ${product.name}</span>
+                    <span>R$ ${itemTotal.toFixed(2)}</span>
+                `;
+                checkoutSummaryItems.appendChild(summaryRow);
+
+                whatsappMessage += `- ${product.quantity}x ${product.name}\n`;
+            });
+        }
+
+        checkoutTotalEl.textContent = `R$ ${total.toFixed(2)}`;
+        whatsappMessage += `\nTotal: R$ ${total.toFixed(2)}`;
+
+        const numeroVendedor = '5531982684415';
+        whatsappButton.href = `https://api.whatsapp.com/send?phone=${numeroVendedor}&text=${encodeURIComponent(whatsappMessage)}`;
     }
 });

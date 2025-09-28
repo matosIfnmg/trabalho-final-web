@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
     <header>
         <div class="container">
             <div class="logo"><a href="index.html">VF Amigurumis</a></div>
-            <nav>
+            <button class="hamburger-menu" aria-label="Abrir menu">☰</button>
+            <nav id="main-nav">
                 <ul>
                     <li><a href="loja.html">Loja</a></li>
                     <li><a href="sobre.html">Sobre</a></li>
@@ -31,41 +31,24 @@
             <p class="checkout-instructions">
                 Confira os itens do seu pedido abaixo. Ao clicar no botão, seu pedido será enviado para o nosso WhatsApp para combinarmos o pagamento e a entrega.
             </p>
-
             <div class="final-order-summary">
                 <h2>Resumo do Pedido</h2>
-                <div class="summary-row">
-                    <span>1x Polvo Zezinho</span>
-                    <span>R$ 89,90</span>
-                </div>
-                <div class="summary-row">
-                    <span>1x Mascote Galo</span>
-                    <span>R$ 89,90</span>
-                </div>
+                <div id="checkout-summary-items">
+                    </div>
                 <div class="summary-total">
                     <span>Total:</span>
-                    <span>R$ 179,80</span>
+                    <span id="checkout-total">R$ 0,00</span>
                 </div>
             </div>
-
-            <a 
-                href="https://api.whatsapp.com/send?phone=5531982684415&text=Olá! Tenho interesse nos seguintes produtos: 1x Polvo Zezinho, 1x Mascote Galo. Total: R$ 179,80." 
-                class="cta-button whatsapp-button"
-                target="_blank"
-            >
+            <a href="#" id="whatsapp-button" class="cta-button whatsapp-button" target="_blank">
                 Enviar Pedido via WhatsApp
             </a>
         </div>
     </main>
 
     <footer>
-        <div class="footer-columns container">
-            <div class="footer-col"><h3>Mapa do Site</h3><ul><li><a href="loja.html">Loja</a></li><li><a href="sobre.html">Sobre</a></li><li><a href="contato.html">Contato</a></li></ul></div>
-            <div class="footer-col"><h3>Contato</h3><p>seunome@email.com</p><p>(XX) XXXXXXXXX</p></div>
-            <div class="footer-col"><h3>Siga-nos</h3><a href="https://www.instagram.com/vf__amigurumi?igsh=MXNjNm5oZjQ0dmp6aw==" target="_blank">Instagram</a></div>
-        </div>
-        <div class="footer-bottom"><p>© 2025 VF Amigurumis. Todos os direitos reservados.</p></div>
-    </footer>
+        </footer>
 
+    <script src="js/main.js"></script>
 </body>
 </html>
