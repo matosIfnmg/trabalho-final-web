@@ -460,7 +460,7 @@ main > h1 {
     margin-top: 10px;
 }
 
-/* --- Página Sobre e Contato --- */
+/* --- Páginas Sobre e Contato --- */
 .about-hero, .contact-page { text-align: center; padding: 40px 0; }
 .about-hero h1, .contact-page h1 { font-size: 42px; margin-bottom: 30px; }
 .about-intro { display: flex; align-items: center; gap: 40px; text-align: left; margin-bottom: 60px; }
@@ -474,7 +474,6 @@ main > h1 {
 .contact-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.08); color: #d9534f; }
 .contact-card h3 { font-size: 24px; margin-bottom: 10px; }
 
-
 /* --- Página de Checkout --- */
 .checkout-page {
     max-width: 800px;
@@ -482,99 +481,74 @@ main > h1 {
     text-align: center;
 }
 
-.checkout-instructions {
-    font-size: 18px;
-    color: #555;
-    margin-bottom: 40px;
-}
-
-.final-order-summary {
-    background-color: #f8f8f8;
-    padding: 30px;
-    border-radius: 8px;
-    text-align: left;
-    margin-bottom: 40px;
-    border: 1px solid #eee;
-}
-
-.final-order-summary h2 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.whatsapp-button {
-    padding: 20px 40px;
-    font-size: 20px;
-    background-color: #25D366;
-}
-
-.whatsapp-button:hover {
-    background-color: #128C7E;
-    color: #fff;
-}
-
 /* --- Modal de Confirmação --- */
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000;
 }
+.modal-content { background-color: #fff; padding: 40px; border-radius: 8px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.modal-content p { font-size: 20px; font-weight: bold; margin-bottom: 30px; }
+.modal-content .cta-button { margin-right: 15px; }
+.secondary-button { display: inline-block; background: none; border: 2px solid #ddd; color: #555; padding: 13px 30px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+.secondary-button:hover { background-color: #f5f5f5; border-color: #ccc; }
 
-.modal-content {
-    background-color: #fff;
-    padding: 40px;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-
-.modal-content p {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 30px;
-}
-
-.modal-content .cta-button {
-    margin-right: 15px;
-}
-
-.secondary-button {
-    display: inline-block;
-    background: none;
-    border: 2px solid #ddd;
-    color: #555;
-    padding: 13px 30px;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-.secondary-button:hover {
-    background-color: #f5f5f5;
-    border-color: #ccc;
-}
-
-/* --- Vitoria, aqui está o estilo para o caminho de volta (Breadcrumbs) --- */
+/* --- Breadcrumbs --- */
 .breadcrumbs {
-    padding-bottom: 20px; /* Adicionado padding bottom */
+    padding-bottom: 20px;
     font-size: 14px;
     color: #777;
-    border-bottom: 1px solid #eee; /* Adicionado uma linha separadora */
-    margin-bottom: 40px; /* Adicionado margem para separar do conteúdo */
+    border-bottom: 1px solid #eee;
+    margin-bottom: 40px;
 }
+.breadcrumbs a { color: #d9534f; text-decoration: none; }
+.breadcrumbs a:hover { text-decoration: underline; }
 
-.breadcrumbs a {
-    color: #d9534f;
-    text-decoration: none;
-}
+/* --- Vitoria, aqui começa o código para a responsividade (celular) --- */
+@media (max-width: 768px) {
 
-.breadcrumbs a:hover {
-    text-decoration: underline;
+    /* Ajusta o layout do Header para celular */
+    header .container {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    header nav {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    header nav ul {
+        justify-content: center;
+        flex-wrap: nowrap;
+    }
+
+    /* Ajusta os títulos para telas menores */
+    .hero-content h1 {
+        font-size: 36px;
+    }
+    .featured-products h2, .about-text h2, .full-product-grid h2, .product-info h1 {
+        font-size: 28px;
+    }
+
+    /* Ajusta seções com colunas para empilhar */
+    .about-section .container,
+    .shop-layout,
+    .product-details-layout,
+    .cart-layout,
+    .footer-columns {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .product-gallery, .product-info {
+        max-width: 100%;
+    }
+    
+    .filters {
+        width: 100%;
+        flex-basis: auto;
+    }
+
+    .contact-options {
+        grid-template-columns: 1fr;
+    }
 }
