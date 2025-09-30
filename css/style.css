@@ -99,7 +99,8 @@ header .header-icons {
 
 /* --- Hero Section --- */
 .hero {
-    background-color: #ccc; 
+    /* ALTERAÇÃO: Troquei a cor de fundo pela imagem */
+    background-image: url('../images/fundo.jpg'); 
     background-size: cover;
     background-position: center;
     position: relative;
@@ -113,6 +114,7 @@ header .header-icons {
     left: 0;
     width: 100%;
     height: 100%;
+    /* Isso escurece a imagem para o texto ficar legível */
     background-color: rgba(0, 0, 0, 0.5);
 }
 
@@ -438,8 +440,6 @@ main > h1 {
     flex-shrink: 0;
 }
 
-/* --- CORREÇÃO ADICIONADA --- */
-/* Esta nova regra garante que QUALQUER imagem dentro da célula de produto do carrinho fique pequena */
 .cart-items .product-info-cell img {
     width: 80px;
     height: 80px;
@@ -642,3 +642,4 @@ main > h1 {
         text-align: center;
     }
 }
+
