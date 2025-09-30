@@ -189,9 +189,12 @@ a.product-card:hover {
     color: #333;
 }
 
-.product-card .image-placeholder {
-    height: 300px;
+.product-card img {
     width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
 }
 
 .product-card h3 {
@@ -211,11 +214,14 @@ a.product-card:hover {
     gap: 50px;
 }
 
-.about-image .image-placeholder.circle {
+.about-profile-pic {
     width: 300px;
     height: 300px;
     border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
 }
+
 
 .about-text p {
     margin-bottom: 30px;
@@ -432,6 +438,17 @@ main > h1 {
     flex-shrink: 0;
 }
 
+/* --- CORREÇÃO ADICIONADA --- */
+/* Esta nova regra garante que QUALQUER imagem dentro da célula de produto do carrinho fique pequena */
+.cart-items .product-info-cell img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
 .remove-btn {
     background: none;
     border: 1px solid #ddd;
@@ -485,6 +502,7 @@ main > h1 {
 .contact-card { background-color: #f8f8f8; padding: 40px 20px; border-radius: 8px; border: 1px solid #eee; transition: transform 0.3s, box-shadow 0.3s; }
 .contact-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.08); color: #d9534f; }
 .contact-card h3 { font-size: 24px; margin-bottom: 10px; }
+
 
 /* --- Página de Checkout --- */
 .checkout-page {
@@ -545,14 +563,13 @@ main > h1 {
 .breadcrumbs a { color: #d9534f; text-decoration: none; }
 .breadcrumbs a:hover { text-decoration: underline; }
 
-/* --- Vitoria, aqui começa o código para a responsividade (celular) --- */
+/* --- Responsividade (Celular) --- */
 @media (max-width: 768px) {
 
     .container {
         width: 95%;
     }
 
-    /* Ajusta o layout do Header para celular */
     header .container {
         flex-wrap: wrap;
         justify-content: space-between;
@@ -589,7 +606,6 @@ main > h1 {
         display: none;
     }
 
-    /* Ajusta os títulos para telas menores */
     .hero-content h1 {
         font-size: 36px;
     }
@@ -597,7 +613,6 @@ main > h1 {
         font-size: 28px;
     }
 
-    /* Ajusta seções com colunas para empilhar */
     .about-section .container,
     .shop-layout,
     .product-details-layout,
@@ -623,7 +638,6 @@ main > h1 {
         grid-template-columns: 1fr;
     }
     
-    /* Vitoria, aqui está a correção para a página Sobre no mobile */
     .about-intro-text {
         text-align: center;
     }
