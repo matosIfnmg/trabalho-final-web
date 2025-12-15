@@ -1,38 +1,11 @@
-// Vitoria, este é o nosso "banco de dados" de produtos no navegador.
-const products = {
-    luffy: {
-        id: 'luffy',
-        name: 'Luffy',
-        price: 49.90,
-        image: 'images/luffy.jpeg',
-        description: 'Descrição detalhada do boneco Luffy, feito com materiais de alta qualidade, perfeito para fãs de One Piece.'
-    },
-    cooky: {
-        id: 'cooky',
-        name: 'Cooky (Coelho BTS)',
-        price: 35.00,
-        image: 'images/coelho.jpeg',
-        description: 'Descrição detalhada do coelho Cooky do BTS, um presente ideal para fãs do grupo.'
-    },
-    princesa: {
-        id: 'princesa',
-        name: 'Princesa',
-        price: 39.90,
-        image: 'images/princesa.jpeg',
-        description: 'Descrição detalhada da Princesa amigurumi, com vestido e coroa feitos à mão.'
-    },
-    boneca: {
-        id: 'boneca',
-        name: 'Boneca',
-        price: 69.90,
-        image: 'images/boneca.jpeg',
-        description: 'Descrição detalhada da boneca amigurumi, com roupas e acessórios.'
-    }
-};
+// js/main.js
+
+// URL da sua API (Já configurada)
+const BASE_API_URL = 'https://back-end-tf-web-nu.vercel.app'; 
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 1. LÓGICA DO MENU HAMBÚRGUER (para todas as páginas) ---
+    // --- 1. LÓGICA DO MENU HAMBÚRGUER ---
     const hamburgerBtn = document.querySelector('.hamburger-menu');
     const mainNav = document.getElementById('main-nav');
 
@@ -42,30 +15,93 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 2. LÓGICA DA PÁGINA DE PRODUTO (Agora Dinâmica) ---
+    // --- 2. CARREGAR PRODUTOS NA HOME (index.html) ---
+    const productGrid = document.getElementById('products-grid'); 
+
+    // Só tenta buscar produtos se a "grade" existir na tela
+    if (productGrid) {
+        productGrid.innerHTML = '<p>Carregando catálogo...</p>';
+        
+        fetch(`${BASE_API_URL}/products`)
+            .then(response => response.json())
+            .then(products => {
+                productGrid.innerHTML = ''; // Limpa o "Carregando..."
+                
+                products.forEach(product => {
+                    const card = document.createElement('a');
+                    card.href = `produto.html?id=${product.id}`; // O ID vem do banco ('luffy', 'cooky', etc)
+                    card.classList.add('product-card');
+                    
+                    // Formata o preço (converte texto/número para formato BRL)
+                    const priceVal = parseFloat(product.price);
+                    const priceFormatted = priceVal.toFixed(2).replace('.', ',');
+
+                    card.innerHTML = `
+                        <img src="${product.image}" alt="${product.name}">
+                        <h3>${product.name}</h3>
+                        <p>R$ ${priceFormatted}</p>
+                    `;
+                    productGrid.appendChild(card);
+                });
+            })
+            .catch(err => {
+                console.error('Erro na API:', err);
+                productGrid.innerHTML = '<p>Erro ao carregar produtos. Tente recarregar a página.</p>';
+            });
+    }
+
+    // --- 3. LÓGICA DA PÁGINA DE PRODUTO (produto.html) ---
     const productInfoEl = document.querySelector('.product-info');
-    // Verifica se estamos na página de produto pela presença do elemento
+    
+    // Verifica se estamos na página de detalhes
     if (productInfoEl && window.location.pathname.includes('produto.html')) {
         
-        // Pega o ID do produto da URL (ex: ?id=luffy)
         const params = new URLSearchParams(window.location.search);
         const productId = params.get('id');
-        const product = products[productId];
 
-        // Se o produto for encontrado em nosso catálogo, preenche a página
-        if (product) {
-            document.querySelector('.breadcrumbs span').textContent = product.name;
-            document.querySelector('.product-gallery .main-image').src = product.image;
-            document.querySelector('.product-info h1').textContent = product.name;
-            document.querySelector('.product-info .price').textContent = `R$ ${product.price.toFixed(2).replace('.', ',')}`;
-            document.querySelector('.product-info .description').textContent = product.description;
+        document.querySelector('.product-info h1').textContent = 'Carregando...';
 
-            // Atualiza os data-attributes para o carrinho funcionar com o produto certo
-            productInfoEl.dataset.productId = product.id;
-            productInfoEl.dataset.productName = product.name;
-            productInfoEl.dataset.productPrice = product.price;
-        }
+        // Busca o produto específico na API
+        fetch(`${BASE_API_URL}/products/${productId}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Produto não encontrado');
+                return response.json();
+            })
+            .then(product => {
+                const priceFloat = parseFloat(product.price);
+                const priceFormatted = priceFloat.toFixed(2).replace('.', ',');
+                
+                // Preenche os dados na tela
+                const breadcrumbSpan = document.querySelector('.breadcrumbs span');
+                if(breadcrumbSpan) breadcrumbSpan.textContent = product.name;
 
+                const mainImg = document.querySelector('.product-gallery .main-image');
+                if(mainImg) mainImg.src = product.image;
+                
+                document.querySelector('.product-info h1').textContent = product.name;
+                document.querySelector('.product-info .price').textContent = `R$ ${priceFormatted}`;
+                
+                const descEl = document.querySelector('.product-info .description');
+                if(descEl) descEl.textContent = product.description;
+
+                // Salva dados nos atributos para o carrinho usar depois
+                productInfoEl.dataset.productId = product.id;
+                productInfoEl.dataset.productName = product.name;
+                productInfoEl.dataset.productPrice = priceFloat;
+                
+                // Ativa os botões do carrinho agora que os dados chegaram
+                setupCartLogic(product, productInfoEl);
+            })
+            .catch(err => {
+                console.error(err);
+                document.querySelector('.product-info h1').textContent = 'Produto não encontrado';
+                const desc = document.querySelector('.product-info .description');
+                if(desc) desc.textContent = 'Não foi possível carregar as informações deste produto.';
+            });
+    }
+
+    // --- 4. FUNÇÃO DO CARRINHO DE COMPRAS (Lógica Local) ---
+    function setupCartLogic(productData, infoElement) {
         const quantityInput = document.getElementById('quantity');
         const increaseBtn = document.getElementById('increase-quantity');
         const decreaseBtn = document.getElementById('decrease-quantity');
@@ -73,51 +109,79 @@ document.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById('add-to-cart-modal');
         const continueShoppingBtn = document.getElementById('continue-shopping-btn');
 
-        increaseBtn.addEventListener('click', () => {
-            quantityInput.value = parseInt(quantityInput.value) + 1;
-        });
-        decreaseBtn.addEventListener('click', () => {
-            let val = parseInt(quantityInput.value);
-            if (val > 1) {
-                quantityInput.value = val - 1;
-            }
-        });
+        if(increaseBtn) {
+            increaseBtn.addEventListener('click', () => {
+                let current = parseInt(quantityInput.value) || 1;
+                quantityInput.value = current + 1;
+            });
+        }
+        
+        if(decreaseBtn) {
+            decreaseBtn.addEventListener('click', () => {
+                let val = parseInt(quantityInput.value) || 1;
+                if (val > 1) quantityInput.value = val - 1;
+            });
+        }
 
-        addToCartBtn.addEventListener('click', () => {
-            const productToAdd = {
-                id: productInfoEl.dataset.productId,
-                name: productInfoEl.dataset.productName,
-                price: parseFloat(productInfoEl.dataset.productPrice),
-                quantity: parseInt(quantityInput.value),
-                image: products[productInfoEl.dataset.productId].image // Adiciona a imagem ao carrinho
-            };
-            
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            cart.push(productToAdd);
-            localStorage.setItem('cart', JSON.stringify(cart));
-            
-            modal.style.display = 'flex';
-        });
+        if(addToCartBtn) {
+            addToCartBtn.addEventListener('click', () => {
+                const qtd = parseInt(quantityInput.value) || 1;
+                const productToAdd = {
+                    id: infoElement.dataset.productId,
+                    name: infoElement.dataset.productName,
+                    price: parseFloat(infoElement.dataset.productPrice),
+                    quantity: qtd,
+                    image: productData.image 
+                };
+                
+                let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                
+                // Verifica se já existe no carrinho para somar quantidade
+                const existingIndex = cart.findIndex(item => item.id === productToAdd.id);
+                if(existingIndex > -1) {
+                    cart[existingIndex].quantity += qtd;
+                } else {
+                    cart.push(productToAdd);
+                }
 
-        continueShoppingBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
+                localStorage.setItem('cart', JSON.stringify(cart));
+                
+                if(modal) modal.style.display = 'flex';
+            });
+        }
+
+        if(continueShoppingBtn) {
+            continueShoppingBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+        }
     }
 
-    // --- 3. LÓGICA DA PÁGINA DO CARRINHO ---
+    // --- 5. CARRINHO E CHECKOUT (Lógica de exibição do LocalStorage) ---
+    // (Esta parte roda apenas nas páginas carrinho.html ou checkout.html)
     const cartItemList = document.getElementById('cart-item-list');
+    const checkoutSummaryItems = document.getElementById('checkout-summary-items');
+
     if (cartItemList) {
+        renderCartPage();
+    }
+    
+    if (checkoutSummaryItems) {
+        renderCheckoutPage();
+    }
+
+    function renderCartPage() {
         const subtotalEl = document.getElementById('subtotal');
         const totalEl = document.getElementById('total');
-
-        const renderCart = () => {
+        
+        const render = () => {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             cartItemList.innerHTML = '';
 
             if (cart.length === 0) {
                 cartItemList.innerHTML = `<tr><td colspan="5" class="empty-cart-message"><p>Seu carrinho está vazio.</p><a href="loja.html" class="cta-button">Ver a Loja</a></td></tr>`;
-                subtotalEl.textContent = 'R$ 0,00';
-                totalEl.textContent = 'R$ 0,00';
+                if(subtotalEl) subtotalEl.textContent = 'R$ 0,00';
+                if(totalEl) totalEl.textContent = 'R$ 0,00';
                 return;
             }
 
@@ -135,8 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 cartItemList.appendChild(row);
             });
-            subtotalEl.textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
-            totalEl.textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+            if(subtotalEl) subtotalEl.textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+            if(totalEl) totalEl.textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
         };
 
         cartItemList.addEventListener('click', (event) => {
@@ -154,35 +218,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             localStorage.setItem('cart', JSON.stringify(cart));
-            renderCart();
+            render();
         });
 
-        renderCart();
+        render();
     }
 
-    // --- 4. LÓGICA DA PÁGINA DA LOJA ---
-    const priceSlider = document.getElementById('price-slider');
-    if (priceSlider) {
-        const priceValue = document.getElementById('price-value');
-        const updatePriceValue = () => {
-            priceValue.textContent = `Até R$ ${priceSlider.value}`;
-        };
-        priceSlider.addEventListener('input', updatePriceValue);
-        updatePriceValue();
-    }
-
-    // --- 5. LÓGICA DA PÁGINA DE CHECKOUT ---
-    const checkoutSummaryItems = document.getElementById('checkout-summary-items');
-    if (checkoutSummaryItems) {
+    function renderCheckoutPage() {
         const cart = JSON.parse(localStorage.getItem('cart')) || [];
         const checkoutTotalEl = document.getElementById('checkout-total');
         const whatsappButton = document.getElementById('whatsapp-button');
         let total = 0;
         let whatsappMessage = 'Olá! Tenho interesse nos seguintes produtos:\n';
 
+        checkoutSummaryItems.innerHTML = '';
+
         if (cart.length === 0) {
-            checkoutSummaryItems.innerHTML = '<p style="text-align:center;">Seu carrinho está vazio. Volte para a loja para adicionar produtos.</p>';
-            whatsappButton.style.display = 'none'; 
+            checkoutSummaryItems.innerHTML = '<p style="text-align:center;">Seu carrinho está vazio.</p>';
+            if(whatsappButton) whatsappButton.style.display = 'none'; 
         } else {
             cart.forEach(product => {
                 const itemTotal = product.price * product.quantity;
@@ -200,10 +253,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        checkoutTotalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        if(checkoutTotalEl) checkoutTotalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
         whatsappMessage += `\nTotal: R$ ${total.toFixed(2).replace('.', ',')}`;
 
         const numeroVendedor = '5538998838889';
-        whatsappButton.href = `https://api.whatsapp.com/send?phone=${numeroVendedor}&text=${encodeURIComponent(whatsappMessage)}`;
+        if(whatsappButton) whatsappButton.href = `https://api.whatsapp.com/send?phone=${numeroVendedor}&text=${encodeURIComponent(whatsappMessage)}`;
     }
 });
