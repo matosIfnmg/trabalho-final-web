@@ -20,11 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return; 
     }
 
-    // Logout e Menu Hambúrguer
+    // Logout
     document.querySelectorAll('a[href="login.html"]').forEach(link => {
         link.addEventListener('click', () => localStorage.removeItem('adminLoggedIn'));
     });
 
+    // Menu Hambúrguer
     const adminHamburger = document.querySelector('.admin-hamburger');
     const adminSidebar = document.getElementById('admin-sidebar');
     if(adminHamburger && adminSidebar) {
@@ -41,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // FUNÇÕES DO SISTEMA
 // ==========================================
 
-// --- FUNÇÃO DE LOGIN ISOLADA ---
+// --- FUNÇÃO DE LOGIN ---
 function setupLoginForm() {
     const loginForm = document.getElementById('login-form') || document.querySelector('form');
     if (!loginForm) return;
@@ -143,9 +144,10 @@ async function setupProductForm(mode) {
     const previewContainer = document.getElementById('image-preview-container');
     const previewImg = document.getElementById('image-preview');
     
+    // Variável que guarda o link da imagem (Vazia no início ou preenchida na edição)
     let currentImageUrl = ''; 
 
-    // 1. UPLOAD MANUAL COM PROTEÇÃO PARA ANDROID
+    // 1. UPLOAD MANUAL COM PROTEÇÃO PARA ANDROID & SUBSTITUIÇÃO
     if (uploadBtn) {
         uploadBtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -156,8 +158,8 @@ async function setupProductForm(mode) {
                 tabs: 'file camera url facebook gdrive',
                 crop: 'free'
             }).done(function(file) {
-                // AQUI ESTÁ A CORREÇÃO:
-                // Bloqueia o botão salvar imediatamente para evitar clique antes da hora
+                
+                // BLOQUEIO DE SEGURANÇA: Impede salvar antes do upload terminar
                 if(saveBtn) {
                     saveBtn.disabled = true;
                     saveBtn.textContent = 'Aguarde o upload...';
@@ -165,19 +167,22 @@ async function setupProductForm(mode) {
                 }
                 uploadBtn.textContent = 'Enviando arquivo...';
                 
+                // Promessa do upload
                 file.promise()
                     .done(function(fileInfo) {
-                        // Sucesso: Atualiza URL e libera botão
+                        // SUCESSO:
+                        // 1. Atualiza a variável com o NOVO link (sobrescrevendo o antigo)
                         currentImageUrl = fileInfo.cdnUrl;
-                        console.log('Upload concluído:', currentImageUrl);
+                        console.log('Nova imagem definida:', currentImageUrl);
                         
+                        // 2. Mostra a nova imagem na tela imediatamente
                         if(previewContainer && previewImg) {
                             previewImg.src = currentImageUrl;
                             previewContainer.style.display = 'block';
                         }
                         uploadBtn.textContent = '✅ Foto Carregada!';
                         
-                        // Libera o botão salvar
+                        // 3. Libera o botão salvar
                         if(saveBtn) {
                             saveBtn.disabled = false;
                             saveBtn.textContent = mode === 'edit' ? 'Salvar Alterações' : 'Salvar Produto';
@@ -185,7 +190,7 @@ async function setupProductForm(mode) {
                         }
                     })
                     .fail(function(error) {
-                        // Erro no upload
+                        // ERRO:
                         alert("Erro ao enviar a imagem. Tente novamente.");
                         uploadBtn.textContent = '📷 Tentar Novamente';
                         if(saveBtn) {
@@ -221,9 +226,10 @@ async function setupProductForm(mode) {
                 const catSelect = document.getElementById('categoria');
                 if(catSelect) catSelect.value = product.category || 'Geral'; 
                 
-                // Imagem
+                // Imagem: Carrega a do banco
                 currentImageUrl = product.image;
                 
+                // Mostra a imagem do banco no preview
                 if (currentImageUrl && previewContainer && previewImg) {
                     previewImg.src = currentImageUrl;
                     previewContainer.style.display = 'block';
@@ -249,12 +255,12 @@ async function setupProductForm(mode) {
                 return;
             }
 
-            // Se não tiver imagem, usa placeholder
+            // Se não tiver imagem (nem antiga, nem nova), usa placeholder
             if (!currentImageUrl) {
                 currentImageUrl = 'https://placehold.co/400?text=Sem+Imagem';
             }
 
-            // Pega Categoria com segurança (se o elemento não existir, usa Geral)
+            // Pega Categoria com segurança
             const categoriaVal = document.getElementById('categoria')?.value || 'Geral';
 
             const productData = {
@@ -262,6 +268,7 @@ async function setupProductForm(mode) {
                 description: document.getElementById('descricao').value,
                 price: parseFloat(precoVal.replace(',', '.')),
                 stock: parseInt(document.getElementById('estoque').value) || 0,
+                // Aqui vai a imagem correta (seja a que veio do banco ou a nova que foi upada)
                 image: currentImageUrl,
                 category: categoriaVal 
             };
