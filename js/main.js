@@ -2,76 +2,71 @@
 
 const BASE_API_URL = 'https://back-end-tf-web-nu.vercel.app'; 
 
-// Variáveis Globais para guardar os produtos e filtrar localmente
+// Variáveis Globais
 let currentProducts = []; 
 let currentCategoryFilter = 'Todos';
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 1. MENU HAMBÚRGUER ---
+    // 1. Menu Mobile
     const hamburgerBtn = document.querySelector('.hamburger-menu');
     const mainNav = document.getElementById('main-nav');
-
     if (hamburgerBtn && mainNav) {
-        hamburgerBtn.addEventListener('click', () => {
-            mainNav.classList.toggle('active');
-        });
+        hamburgerBtn.addEventListener('click', () => mainNav.classList.toggle('active'));
     }
 
-    // --- 2. CONTROLES DA LOJA (Slider e Categorias) ---
+    // 2. Slider de Preço
     const priceSlider = document.getElementById('price-slider');
     const priceValue = document.getElementById('price-value');
-    
-    // Evento: Quando mexe no slider
     if (priceSlider && priceValue) {
         priceSlider.addEventListener('input', (e) => {
-            const val = e.target.value;
-            priceValue.textContent = `Até R$ ${val}`;
-            renderGrid(); // Redesenha a tela aplicando o filtro de preço
+            priceValue.textContent = `Até R$ ${e.target.value}`;
+            renderGrid(); // Filtra localmente sem recarregar
         });
     }
 
-    // Carregar Lista de Categorias Lateral
+    // 3. Carregar Sidebar de Categorias (A Mágica acontece aqui)
     setupCategorySidebar();
 
-    // --- 3. CARREGAMENTO INICIAL ---
+    // 4. Carregamento Inicial (Busca Todos)
     if (document.getElementById('products-grid')) {
-        // Carrega todos os produtos ao entrar na loja
         fetchProducts(); 
     }
 
-    // --- 4. PÁGINA DE DETALHES ---
-    if (window.location.pathname.includes('produto.html')) {
-        setupProductDetails();
-    }
+    // 5. Detalhes do Produto
+    if (window.location.pathname.includes('produto.html')) setupProductDetails();
 
-    // --- 5. CARRINHO ---
+    // 6. Carrinho
     if (document.getElementById('cart-item-list')) renderCartPage();
     if (document.getElementById('checkout-summary-items')) renderCheckoutPage();
 });
 
 // =========================================
-// LÓGICA DA LOJA (PRODUTOS E FILTROS)
+// LÓGICA DE CATEGORIAS E PRODUTOS
 // =========================================
 
 function setupCategorySidebar() {
     const categoryListEl = document.getElementById('dynamic-category-list');
     if (!categoryListEl) return;
 
+    // Busca apenas as categorias que existem no banco
     fetch(`${BASE_API_URL}/categories`)
         .then(res => res.json())
         .then(categories => {
             categoryListEl.innerHTML = ''; 
 
-            // Botão "Todos"
+            // Cria botão "Todos" (Padrão)
             createCategoryButton(categoryListEl, 'Todos', true);
 
-            // Botões do Banco
+            // Cria botões das categorias vindas do banco
             categories.forEach(cat => {
                 createCategoryButton(categoryListEl, cat, false);
             });
         })
-        .catch(err => categoryListEl.innerHTML = '<li>Erro ao carregar</li>');
+        .catch(err => {
+            console.error(err);
+            categoryListEl.innerHTML = '<li>Erro ao carregar categorias</li>';
+        });
 }
 
 function createCategoryButton(container, name, isAll) {
@@ -80,17 +75,17 @@ function createCategoryButton(container, name, isAll) {
     a.href = "#";
     a.textContent = name;
     
-    // Adiciona classe 'active' se for o selecionado atual
-    if (name === currentCategoryFilter) a.classList.add('active-category');
+    // Marca o "Todos" como ativo inicialmente
+    if (name === 'Todos' && currentCategoryFilter === 'Todos') a.classList.add('active-category');
 
     a.addEventListener('click', (e) => {
         e.preventDefault();
         
-        // Atualiza visual (negrito no selecionado)
+        // Troca o visual do botão ativo
         document.querySelectorAll('.filter-group a').forEach(el => el.classList.remove('active-category'));
         e.target.classList.add('active-category');
 
-        // Busca produtos
+        // Busca os produtos (Todos ou Filtrado)
         if (isAll) fetchProducts();
         else fetchProducts(name);
     });
@@ -99,14 +94,14 @@ function createCategoryButton(container, name, isAll) {
     container.appendChild(li);
 }
 
-// 1. Busca dados da API
 function fetchProducts(category = null) {
     const productGrid = document.getElementById('products-grid');
     if (!productGrid) return;
 
-    productGrid.innerHTML = '<p style="text-align:center; width:100%;">Carregando...</p>';
+    productGrid.innerHTML = '<p style="text-align:center; width:100%; padding: 40px;">Carregando...</p>';
     currentCategoryFilter = category || 'Todos';
 
+    // Define a rota: Se tem categoria, filtra na API. Se não, busca tudo.
     const endpoint = category 
         ? `${BASE_API_URL}/products/category/${category}`
         : `${BASE_API_URL}/products`;
@@ -114,34 +109,30 @@ function fetchProducts(category = null) {
     fetch(endpoint)
         .then(res => res.json())
         .then(products => {
-            currentProducts = products; // Guarda na memória global
-            setupPriceSliderMax(products); // Ajusta o máximo do slider
-            renderGrid(); // Desenha na tela
+            currentProducts = products; // Salva na memória
+            setupPriceSliderMax(products); // Ajusta o slider para o preço desses produtos
+            renderGrid(); // Mostra na tela
         })
         .catch(err => {
             console.error(err);
-            productGrid.innerHTML = '<p>Erro ao carregar produtos.</p>';
+            productGrid.innerHTML = '<p style="text-align:center;">Nenhum produto encontrado.</p>';
         });
 }
 
-// 2. Ajusta o slider baseado no produto mais caro
 function setupPriceSliderMax(products) {
     const slider = document.getElementById('price-slider');
     const priceDisplay = document.getElementById('price-value');
     if (!slider || products.length === 0) return;
 
-    // Acha o maior preço da lista
+    // Descobre o mais caro da lista atual
     const maxPrice = Math.max(...products.map(p => parseFloat(p.price)));
-    
-    // Arredonda para cima (ex: 145 -> 150)
-    const niceMax = Math.ceil(maxPrice / 10) * 10;
+    const niceMax = Math.ceil(maxPrice / 10) * 10; // Arredonda (ex: 45 -> 50)
     
     slider.max = niceMax;
-    slider.value = niceMax; // Começa selecionando tudo
+    slider.value = niceMax; // Reseta o slider para mostrar tudo
     priceDisplay.textContent = `Até R$ ${niceMax}`;
 }
 
-// 3. Desenha os produtos (Aplicando filtro de preço)
 function renderGrid() {
     const productGrid = document.getElementById('products-grid');
     const slider = document.getElementById('price-slider');
@@ -149,13 +140,13 @@ function renderGrid() {
 
     const maxPrice = slider ? parseFloat(slider.value) : 10000;
 
-    productGrid.innerHTML = ''; // Limpa tela
+    productGrid.innerHTML = ''; 
 
-    // Filtra localmente pelo preço do slider
+    // Filtra pelo preço (Javascript Local)
     const filtered = currentProducts.filter(p => parseFloat(p.price) <= maxPrice);
 
     if (filtered.length === 0) {
-        productGrid.innerHTML = '<p style="text-align:center; width:100%; padding: 20px;">Nenhum produto nessa faixa de preço.</p>';
+        productGrid.innerHTML = '<p style="text-align:center; width:100%; padding: 20px; color: #666;">Nenhum produto até este valor.</p>';
         return;
     }
 
@@ -176,7 +167,7 @@ function renderGrid() {
 }
 
 // =========================================
-// OUTRAS FUNÇÕES (DETALHES, CARRINHO)
+// OUTRAS FUNÇÕES (Detalhes, Carrinho)
 // =========================================
 
 function setupProductDetails() {
@@ -193,7 +184,6 @@ function setupProductDetails() {
         .then(product => {
             const priceVal = parseFloat(product.price);
             
-            // Preenche HTML
             const breadcrumbSpan = document.querySelector('.breadcrumbs span');
             if(breadcrumbSpan) breadcrumbSpan.textContent = product.name;
             
@@ -206,16 +196,13 @@ function setupProductDetails() {
             const desc = document.querySelector('.product-info .description');
             if(desc) desc.textContent = product.description;
 
-            // Dados para o botão adicionar
             productInfoEl.dataset.productId = product.id;
             productInfoEl.dataset.productName = product.name;
             productInfoEl.dataset.productPrice = priceVal;
             
             setupCartActions(product);
         })
-        .catch(() => {
-            document.querySelector('.product-info h1').textContent = 'Produto não encontrado';
-        });
+        .catch(() => document.querySelector('.product-info h1').textContent = 'Produto não encontrado');
 }
 
 function setupCartActions(productData) {
