@@ -1,21 +1,11 @@
 // js/admin.js
 
-// ⬇️ MUITO IMPORTANTE: Cole a URL da sua API aqui (sem a barra no final)
+// URL da API
 const API_URL = 'https://back-end-tf-web-nu.vercel.app'; 
 
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // --- 1. MENU HAMBÚRGUER ---
-    const adminHamburger = document.querySelector('.admin-hamburger');
-    const adminSidebar = document.getElementById('admin-sidebar');
 
-    if(adminHamburger && adminSidebar) {
-        adminHamburger.addEventListener('click', () => {
-            adminSidebar.classList.toggle('active');
-        });
-    }
-
-    // --- 2. VERIFICAÇÃO DE LOGIN ---
+    // --- 1. VERIFICAÇÃO DE LOGIN ---
     const isLoginPage = window.location.pathname.includes('login.html');
     const isLoggedIn = localStorage.getItem('adminLoggedIn');
 
@@ -24,22 +14,26 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // --- 3. LÓGICA DA PÁGINA DE LOGIN (AGORA SEGURA COM API) ---
+    // --- 2. LÓGICA DA PÁGINA DE LOGIN (Corrigida para Botão/Formulário) ---
     if (isLoginPage) {
-        const loginBtn = document.querySelector('.login-button');
-        if (loginBtn) {
-            loginBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
+        // Agora pegamos o FORMULÁRIO, não só o botão
+        const loginForm = document.getElementById('login-form') || document.querySelector('form');
+        
+        if (loginForm) {
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault(); // Impede a página de recarregar
                 
+                const loginBtn = document.querySelector('.login-button');
                 const emailInput = document.getElementById('email');
                 const senhaInput = document.getElementById('senha');
                 
                 // Feedback visual
-                loginBtn.textContent = 'Verificando...';
-                loginBtn.disabled = true;
+                if(loginBtn) {
+                    loginBtn.textContent = 'Verificando...';
+                    loginBtn.disabled = true;
+                }
 
                 try {
-                    // Chama a API para verificar a senha no banco
                     const response = await fetch(`${API_URL}/login`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -52,42 +46,52 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = await response.json();
 
                     if (response.ok) {
-                        // Sucesso: Salva sessão e entra
                         localStorage.setItem('adminLoggedIn', 'true');
-                        window.location.href = 'index.html';
+                        window.location.href = 'index.html'; // Agora sim redireciona
                     } else {
-                        // Erro: Mostra mensagem da API
                         alert(data.error || 'Login inválido');
-                        loginBtn.textContent = 'Entrar';
-                        loginBtn.disabled = false;
-                        senhaInput.value = ''; // Limpa senha
+                        if(loginBtn) {
+                            loginBtn.textContent = 'Entrar';
+                            loginBtn.disabled = false;
+                        }
                     }
-
                 } catch (error) {
                     console.error('Erro:', error);
                     alert('Erro ao conectar com o servidor.');
-                    loginBtn.textContent = 'Entrar';
-                    loginBtn.disabled = false;
+                    if(loginBtn) {
+                        loginBtn.textContent = 'Entrar';
+                        loginBtn.disabled = false;
+                    }
                 }
             });
         }
         return; 
     }
 
+    // ... (O RESTO DO CÓDIGO CONTINUA IGUAL: Menu Hambúrguer, Logout, Produtos, etc.) ...
+    
+    // --- 3. MENU HAMBÚRGUER ---
+    const adminHamburger = document.querySelector('.admin-hamburger');
+    const adminSidebar = document.getElementById('admin-sidebar');
+    if(adminHamburger && adminSidebar) {
+        adminHamburger.addEventListener('click', () => {
+            adminSidebar.classList.toggle('active');
+        });
+    }
+
     // Logout
     const logoutLinks = document.querySelectorAll('a[href="login.html"]');
     logoutLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            localStorage.removeItem('adminLoggedIn');
-        });
+        link.addEventListener('click', () => localStorage.removeItem('adminLoggedIn'));
     });
 
-    // --- 4. ROTEAMENTO DAS PÁGINAS ---
     if (window.location.pathname.includes('produtos.html')) fetchProductsTable();
     if (window.location.pathname.includes('adicionar-produto.html')) setupProductForm('create');
     if (window.location.pathname.includes('editar-produto.html')) setupProductForm('edit');
 });
 
+// ... (Mantenha as funções fetchProductsTable, deleteProduct e setupProductForm aqui embaixo) ...
+// (Copie as funções do código anterior se precisar, elas não mudaram)
 // ==========================================
 // FUNÇÕES DO SISTEMA (CRUD)
 // ==========================================
