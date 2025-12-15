@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// FUNÇÕES DO SISTEMA (COM UPLOADCARE)
+// FUNÇÕES DO SISTEMA
 // ==========================================
 
 async function fetchProductsTable() {
@@ -91,7 +91,7 @@ async function fetchProductsTable() {
         tbody.innerHTML = ''; 
 
         if(products.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum produto.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum produto cadastrado.</td></tr>';
             return;
         }
         
@@ -139,32 +139,41 @@ async function deleteProduct(id) {
 
 async function setupProductForm(mode) {
     const saveBtn = document.querySelector('.save-button');
+    const previewContainer = document.getElementById('image-preview-container');
+    const previewImg = document.getElementById('image-preview');
     let currentImageUrl = ''; 
 
-    // --- INTEGRAÇÃO UPLOADCARE ---
-    // Inicializa o widget
+    // --- 1. INTEGRAÇÃO UPLOADCARE + PREVIEW ---
     let widget = null;
     try {
+        // Inicializa o widget no input hidden
         widget = uploadcare.Widget('[role=uploadcare-uploader]');
         
-        // Quando o upload terminar, salva a URL na variável
+        // Quando o upload termina...
         widget.onUploadComplete(function(fileInfo) {
             if (fileInfo) {
-                currentImageUrl = fileInfo.cdnUrl; // Pega a URL CDN do Uploadcare
-                console.log("Imagem carregada:", currentImageUrl);
+                // Pega a URL CDN do arquivo
+                currentImageUrl = fileInfo.cdnUrl; 
+                console.log("Upload concluído. URL:", currentImageUrl);
+                
+                // Atualiza o visual para o usuário ver que deu certo
+                if(previewContainer && previewImg) {
+                    previewImg.src = currentImageUrl;
+                    previewContainer.style.display = 'block'; // Mostra a caixa
+                }
             }
         });
     } catch (e) {
-        console.warn("Uploadcare não carregou corretamente (verifique a internet ou a chave pública).");
+        console.warn("Uploadcare não carregou (verifique a internet).", e);
     }
 
-    // --- PREENCHER DADOS SE FOR EDIÇÃO ---
+    // --- 2. SE FOR EDIÇÃO: CARREGAR DADOS EXISTENTES ---
     let editId = null;
     if (mode === 'edit') {
         const params = new URLSearchParams(window.location.search);
         editId = params.get('id');
         
-        // Atualiza título da página
+        // Atualiza título (caso o HTML não tenha)
         const pageTitle = document.getElementById('page-title');
         if(pageTitle) pageTitle.textContent = 'Editar Produto';
 
@@ -178,33 +187,40 @@ async function setupProductForm(mode) {
                 document.getElementById('preco').value = product.price;
                 document.getElementById('estoque').value = product.stock || 0;
                 
-                // Define a imagem atual no widget do Uploadcare para aparecer no preview
+                // Define a imagem atual
                 currentImageUrl = product.image;
+                
+                // Preenche o widget do Uploadcare com a imagem atual
                 if (widget && currentImageUrl) {
-                    widget.value(currentImageUrl);
+                    widget.value(currentImageUrl); 
+                }
+
+                // Mostra o preview da imagem atual
+                if (currentImageUrl && previewContainer && previewImg) {
+                    previewImg.src = currentImageUrl;
+                    previewContainer.style.display = 'block';
                 }
 
                 if(saveBtn) saveBtn.textContent = 'Salvar Alterações';
 
-            } catch (err) { alert('Erro ao carregar dados.'); }
+            } catch (err) { alert('Erro ao carregar dados do produto.'); }
         }
     }
 
-    // --- BOTÃO SALVAR ---
+    // --- 3. AÇÃO DO BOTÃO SALVAR ---
     if (saveBtn) {
         saveBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             
-            // Validações básicas
             const nomeVal = document.getElementById('nome').value;
             const precoVal = document.getElementById('preco').value;
 
             if(!nomeVal || !precoVal) {
-                alert('Preencha pelo menos o Nome e o Preço!');
+                alert('Preencha Nome e Preço!');
                 return;
             }
 
-            // Se não tiver imagem, usa uma padrão
+            // Se não tiver imagem nenhuma, coloca placeholder
             if (!currentImageUrl) {
                 currentImageUrl = 'https://placehold.co/400?text=Sem+Imagem';
             }
@@ -214,7 +230,7 @@ async function setupProductForm(mode) {
                 description: document.getElementById('descricao').value,
                 price: parseFloat(precoVal.replace(',', '.')),
                 stock: parseInt(document.getElementById('estoque').value) || 0,
-                image: currentImageUrl, // Aqui vai a URL do Uploadcare
+                image: currentImageUrl, // Manda a URL do Uploadcare para o banco
                 category: 'Geral'
             };
 
@@ -235,7 +251,7 @@ async function setupProductForm(mode) {
                     alert('Salvo com sucesso!');
                     window.location.href = 'produtos.html'; 
                 } else {
-                    alert('Erro ao salvar.');
+                    alert('Erro ao salvar no banco.');
                     saveBtn.textContent = 'Tentar Novamente';
                     saveBtn.disabled = false;
                 }
