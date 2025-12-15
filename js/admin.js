@@ -59,7 +59,8 @@ function setupLoginForm() {
 
             if (response.ok) {
                 localStorage.setItem('adminLoggedIn', 'true');
-                window.location.href = 'index.html'; 
+                // ⬇️ MUDANÇA AQUI: Redireciona direto para PRODUTOS
+                window.location.href = 'produtos.html'; 
             } else {
                 alert(data.error || 'Login inválido');
                 if(loginBtn) { loginBtn.textContent = 'Entrar'; loginBtn.disabled = false; }
@@ -146,7 +147,6 @@ async function setupProductForm(mode) {
         uploadBtn.addEventListener('click', async (e) => {
             e.preventDefault();
 
-            // Verifica se tem arquivo selecionado
             if (fileInput.files.length === 0) {
                 alert("Por favor, selecione uma foto no campo acima primeiro.");
                 return;
@@ -156,7 +156,6 @@ async function setupProductForm(mode) {
             const formData = new FormData();
             formData.append("image", file);
 
-            // Feedback visual e bloqueio
             uploadBtn.textContent = "Enviando...";
             uploadBtn.disabled = true;
             if(saveBtn) {
@@ -166,7 +165,6 @@ async function setupProductForm(mode) {
             }
 
             try {
-                // Envia para API do ImgBB
                 const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
                     method: "POST",
                     body: formData
@@ -175,11 +173,9 @@ async function setupProductForm(mode) {
                 const data = await res.json();
 
                 if (data.success) {
-                    // SUCESSO!
                     currentImageUrl = data.data.url;
                     console.log("Upload ImgBB Sucesso:", currentImageUrl);
 
-                    // Atualiza Preview
                     if (previewContainer && previewImg) {
                         previewImg.src = currentImageUrl;
                         previewContainer.style.display = 'block';
@@ -187,7 +183,6 @@ async function setupProductForm(mode) {
 
                     uploadBtn.textContent = "✅ Foto Carregada!";
                     
-                    // Libera salvar
                     if(saveBtn) {
                         saveBtn.disabled = false;
                         saveBtn.textContent = mode === 'edit' ? 'Salvar Alterações' : 'Salvar Produto';
@@ -195,7 +190,6 @@ async function setupProductForm(mode) {
                     }
 
                 } else {
-                    // ERRO DO IMGBB
                     console.error("Erro ImgBB:", data);
                     alert("Erro ao enviar imagem: " + (data.error ? data.error.message : "Desconhecido"));
                     uploadBtn.textContent = "Tentar Novamente";
@@ -204,7 +198,6 @@ async function setupProductForm(mode) {
                 }
 
             } catch (error) {
-                // ERRO DE REDE
                 console.error(error);
                 alert("Erro de conexão ao enviar imagem.");
                 uploadBtn.textContent = "Tentar Novamente";
@@ -263,7 +256,6 @@ async function setupProductForm(mode) {
                 return;
             }
 
-            // Se não tiver imagem, usa placeholder
             if (!currentImageUrl) {
                 currentImageUrl = 'https://placehold.co/400?text=Sem+Imagem';
             }
