@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loja - VF Amigurumis</title>
     <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .active-category {
+            font-weight: bold;
+            color: #d63384; /* Cor rosa destaque */
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
@@ -31,27 +39,23 @@
                 <h3>Filtros</h3>
                 <div class="filter-group">
                     <h4>Categorias</h4>
-                    <ul>
-                        <li><a href="#">Animais</a></li>
-                        <li><a href="#">Religiosos</a></li>
-                        <li><a href="#">Personagens</a></li>
+                    <ul id="dynamic-category-list">
+                        <li>Carregando...</li>
                     </ul>
                 </div>
                 <div class="filter-group">
                     <h4>Faixa de Preço</h4>
                     <div class="price-slider">
-                        <input type="range" min="0" max="120" value="120" class="slider" id="price-slider">
-                        <div class="price-value" id="price-value">Até R$ 120</div>
+                        <input type="range" min="0" max="1000" value="1000" class="slider" id="price-slider">
+                        <div class="price-value" id="price-value">Carregando...</div>
                     </div>
                 </div>
             </aside>
             <section class="full-product-grid">
                 <h2>Nossos Produtos</h2>
-                
                 <div class="product-grid" id="products-grid">
-                    <p style="text-align: center; width: 100%; color: #666; padding: 20px;">Carregando produtos do banco de dados...</p>
+                    <p style="text-align: center; width: 100%; color: #666; padding: 20px;">Carregando produtos...</p>
                 </div>
-                
             </section>
         </div>
     </main>

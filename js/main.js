@@ -2,6 +2,10 @@
 
 const BASE_API_URL = 'https://back-end-tf-web-nu.vercel.app'; 
 
+// Variáveis Globais para guardar os produtos e filtrar localmente
+let currentProducts = []; 
+let currentCategoryFilter = 'Todos';
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- 1. MENU HAMBÚRGUER ---
@@ -14,279 +18,314 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 2. FILTRO POR CATEGORIA DINÂMICO ---
-    // Procura a lista vazia no HTML para preencher
-    const categoryListEl = document.getElementById('dynamic-category-list');
-
-    if (categoryListEl) {
-        // Busca as categorias existentes no banco
-        fetch(`${BASE_API_URL}/categories`)
-            .then(res => res.json())
-            .then(categories => {
-                categoryListEl.innerHTML = ''; // Limpa o "Carregando..."
-                
-                // Botão "Todos"
-                const liAll = document.createElement('li');
-                liAll.innerHTML = `<a href="#">Todos</a>`;
-                liAll.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    loadProducts(); // Carrega tudo
-                });
-                categoryListEl.appendChild(liAll);
-
-                // Botões das Categorias do Banco
-                categories.forEach(cat => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<a href="#">${cat}</a>`;
-                    li.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        // Carrega filtrado
-                        loadProducts(cat); 
-                    });
-                    categoryListEl.appendChild(li);
-                });
-            })
-            .catch(err => {
-                console.error('Erro categorias:', err);
-                categoryListEl.innerHTML = '<li><small>Erro ao carregar</small></li>';
-            });
+    // --- 2. CONTROLES DA LOJA (Slider e Categorias) ---
+    const priceSlider = document.getElementById('price-slider');
+    const priceValue = document.getElementById('price-value');
+    
+    // Evento: Quando mexe no slider
+    if (priceSlider && priceValue) {
+        priceSlider.addEventListener('input', (e) => {
+            const val = e.target.value;
+            priceValue.textContent = `Até R$ ${val}`;
+            renderGrid(); // Redesenha a tela aplicando o filtro de preço
+        });
     }
+
+    // Carregar Lista de Categorias Lateral
+    setupCategorySidebar();
 
     // --- 3. CARREGAMENTO INICIAL ---
-    // Se existir a grade de produtos (Home ou Loja), carrega tudo
     if (document.getElementById('products-grid')) {
-        loadProducts(); 
+        // Carrega todos os produtos ao entrar na loja
+        fetchProducts(); 
     }
 
-    // --- 4. PÁGINA DE DETALHES (produto.html) ---
-    const productInfoEl = document.querySelector('.product-info');
-    if (productInfoEl && window.location.pathname.includes('produto.html')) {
-        
-        const params = new URLSearchParams(window.location.search);
-        const productId = params.get('id');
-
-        document.querySelector('.product-info h1').textContent = 'Carregando...';
-
-        fetch(`${BASE_API_URL}/products/${productId}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Produto não encontrado');
-                return response.json();
-            })
-            .then(product => {
-                const priceFloat = parseFloat(product.price);
-                const priceFormatted = priceFloat.toFixed(2).replace('.', ',');
-                
-                const breadcrumbSpan = document.querySelector('.breadcrumbs span');
-                if(breadcrumbSpan) breadcrumbSpan.textContent = product.name;
-
-                const mainImg = document.querySelector('.product-gallery .main-image');
-                if(mainImg) mainImg.src = product.image;
-                
-                document.querySelector('.product-info h1').textContent = product.name;
-                document.querySelector('.product-info .price').textContent = `R$ ${priceFormatted}`;
-                
-                const descEl = document.querySelector('.product-info .description');
-                if(descEl) descEl.textContent = product.description;
-
-                productInfoEl.dataset.productId = product.id;
-                productInfoEl.dataset.productName = product.name;
-                productInfoEl.dataset.productPrice = priceFloat;
-                
-                setupCartLogic(product, productInfoEl);
-            })
-            .catch(err => {
-                console.error(err);
-                document.querySelector('.product-info h1').textContent = 'Produto não encontrado';
-            });
+    // --- 4. PÁGINA DE DETALHES ---
+    if (window.location.pathname.includes('produto.html')) {
+        setupProductDetails();
     }
 
-    // --- 5. CARRINHO E CHECKOUT ---
-    const cartItemList = document.getElementById('cart-item-list');
-    const checkoutSummaryItems = document.getElementById('checkout-summary-items');
-
-    if (cartItemList) renderCartPage();
-    if (checkoutSummaryItems) renderCheckoutPage();
+    // --- 5. CARRINHO ---
+    if (document.getElementById('cart-item-list')) renderCartPage();
+    if (document.getElementById('checkout-summary-items')) renderCheckoutPage();
 });
 
-// --- FUNÇÃO CENTRALIZADA: CARREGAR PRODUTOS (COM FILTRO) ---
-function loadProducts(filterCategory = null) {
+// =========================================
+// LÓGICA DA LOJA (PRODUTOS E FILTROS)
+// =========================================
+
+function setupCategorySidebar() {
+    const categoryListEl = document.getElementById('dynamic-category-list');
+    if (!categoryListEl) return;
+
+    fetch(`${BASE_API_URL}/categories`)
+        .then(res => res.json())
+        .then(categories => {
+            categoryListEl.innerHTML = ''; 
+
+            // Botão "Todos"
+            createCategoryButton(categoryListEl, 'Todos', true);
+
+            // Botões do Banco
+            categories.forEach(cat => {
+                createCategoryButton(categoryListEl, cat, false);
+            });
+        })
+        .catch(err => categoryListEl.innerHTML = '<li>Erro ao carregar</li>');
+}
+
+function createCategoryButton(container, name, isAll) {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = "#";
+    a.textContent = name;
+    
+    // Adiciona classe 'active' se for o selecionado atual
+    if (name === currentCategoryFilter) a.classList.add('active-category');
+
+    a.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // Atualiza visual (negrito no selecionado)
+        document.querySelectorAll('.filter-group a').forEach(el => el.classList.remove('active-category'));
+        e.target.classList.add('active-category');
+
+        // Busca produtos
+        if (isAll) fetchProducts();
+        else fetchProducts(name);
+    });
+
+    li.appendChild(a);
+    container.appendChild(li);
+}
+
+// 1. Busca dados da API
+function fetchProducts(category = null) {
     const productGrid = document.getElementById('products-grid');
     if (!productGrid) return;
 
-    productGrid.innerHTML = '<p style="text-align:center; padding:20px; width:100%;">Carregando catálogo...</p>';
+    productGrid.innerHTML = '<p style="text-align:center; width:100%;">Carregando...</p>';
+    currentCategoryFilter = category || 'Todos';
 
-    // Define qual URL chamar: Todos ou Filtrados
-    const endpoint = filterCategory 
-        ? `${BASE_API_URL}/products/category/${filterCategory}`
+    const endpoint = category 
+        ? `${BASE_API_URL}/products/category/${category}`
         : `${BASE_API_URL}/products`;
 
     fetch(endpoint)
-        .then(response => response.json())
+        .then(res => res.json())
         .then(products => {
-            productGrid.innerHTML = ''; // Limpa o loading
-            
-            if (products.length === 0) {
-                productGrid.innerHTML = '<p style="text-align:center; padding:20px; width:100%;">Nenhum produto encontrado nesta categoria.</p>';
-                return;
-            }
-
-            products.forEach(product => {
-                const card = document.createElement('a');
-                card.href = `produto.html?id=${product.id}`;
-                card.classList.add('product-card');
-                
-                const priceVal = parseFloat(product.price);
-                const priceFormatted = priceVal.toFixed(2).replace('.', ',');
-
-                card.innerHTML = `
-                    <img src="${product.image}" alt="${product.name}">
-                    <h3>${product.name}</h3>
-                    <p>R$ ${priceFormatted}</p>
-                `;
-                productGrid.appendChild(card);
-            });
+            currentProducts = products; // Guarda na memória global
+            setupPriceSliderMax(products); // Ajusta o máximo do slider
+            renderGrid(); // Desenha na tela
         })
         .catch(err => {
-            console.error('Erro na API:', err);
+            console.error(err);
             productGrid.innerHTML = '<p>Erro ao carregar produtos.</p>';
         });
 }
 
-function setupCartLogic(productData, infoElement) {
+// 2. Ajusta o slider baseado no produto mais caro
+function setupPriceSliderMax(products) {
+    const slider = document.getElementById('price-slider');
+    const priceDisplay = document.getElementById('price-value');
+    if (!slider || products.length === 0) return;
+
+    // Acha o maior preço da lista
+    const maxPrice = Math.max(...products.map(p => parseFloat(p.price)));
+    
+    // Arredonda para cima (ex: 145 -> 150)
+    const niceMax = Math.ceil(maxPrice / 10) * 10;
+    
+    slider.max = niceMax;
+    slider.value = niceMax; // Começa selecionando tudo
+    priceDisplay.textContent = `Até R$ ${niceMax}`;
+}
+
+// 3. Desenha os produtos (Aplicando filtro de preço)
+function renderGrid() {
+    const productGrid = document.getElementById('products-grid');
+    const slider = document.getElementById('price-slider');
+    if (!productGrid) return;
+
+    const maxPrice = slider ? parseFloat(slider.value) : 10000;
+
+    productGrid.innerHTML = ''; // Limpa tela
+
+    // Filtra localmente pelo preço do slider
+    const filtered = currentProducts.filter(p => parseFloat(p.price) <= maxPrice);
+
+    if (filtered.length === 0) {
+        productGrid.innerHTML = '<p style="text-align:center; width:100%; padding: 20px;">Nenhum produto nessa faixa de preço.</p>';
+        return;
+    }
+
+    filtered.forEach(product => {
+        const card = document.createElement('a');
+        card.href = `produto.html?id=${product.id}`;
+        card.classList.add('product-card');
+        
+        const priceFormatted = parseFloat(product.price).toFixed(2).replace('.', ',');
+
+        card.innerHTML = `
+            <img src="${product.image}" alt="${product.name}">
+            <h3>${product.name}</h3>
+            <p>R$ ${priceFormatted}</p>
+        `;
+        productGrid.appendChild(card);
+    });
+}
+
+// =========================================
+// OUTRAS FUNÇÕES (DETALHES, CARRINHO)
+// =========================================
+
+function setupProductDetails() {
+    const productInfoEl = document.querySelector('.product-info');
+    if (!productInfoEl) return;
+    
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+
+    document.querySelector('.product-info h1').textContent = 'Carregando...';
+
+    fetch(`${BASE_API_URL}/products/${productId}`)
+        .then(res => { if (!res.ok) throw new Error('404'); return res.json(); })
+        .then(product => {
+            const priceVal = parseFloat(product.price);
+            
+            // Preenche HTML
+            const breadcrumbSpan = document.querySelector('.breadcrumbs span');
+            if(breadcrumbSpan) breadcrumbSpan.textContent = product.name;
+            
+            const mainImg = document.querySelector('.product-gallery .main-image');
+            if(mainImg) mainImg.src = product.image;
+
+            document.querySelector('.product-info h1').textContent = product.name;
+            document.querySelector('.product-info .price').textContent = `R$ ${priceVal.toFixed(2).replace('.', ',')}`;
+            
+            const desc = document.querySelector('.product-info .description');
+            if(desc) desc.textContent = product.description;
+
+            // Dados para o botão adicionar
+            productInfoEl.dataset.productId = product.id;
+            productInfoEl.dataset.productName = product.name;
+            productInfoEl.dataset.productPrice = priceVal;
+            
+            setupCartActions(product);
+        })
+        .catch(() => {
+            document.querySelector('.product-info h1').textContent = 'Produto não encontrado';
+        });
+}
+
+function setupCartActions(productData) {
     const quantityInput = document.getElementById('quantity');
     const increaseBtn = document.getElementById('increase-quantity');
     const decreaseBtn = document.getElementById('decrease-quantity');
     const addToCartBtn = document.getElementById('add-to-cart-btn');
     const modal = document.getElementById('add-to-cart-modal');
     const continueShoppingBtn = document.getElementById('continue-shopping-btn');
+    const productInfoEl = document.querySelector('.product-info');
 
-    if(increaseBtn) {
-        increaseBtn.addEventListener('click', () => {
-            let current = parseInt(quantityInput.value) || 1;
-            quantityInput.value = current + 1;
-        });
-    }
-    
-    if(decreaseBtn) {
-        decreaseBtn.addEventListener('click', () => {
-            let val = parseInt(quantityInput.value) || 1;
-            if (val > 1) quantityInput.value = val - 1;
-        });
-    }
+    if(increaseBtn) increaseBtn.addEventListener('click', () => quantityInput.value = (parseInt(quantityInput.value)||1) + 1);
+    if(decreaseBtn) decreaseBtn.addEventListener('click', () => { let v = (parseInt(quantityInput.value)||1); if(v>1) quantityInput.value = v-1; });
 
     if(addToCartBtn) {
         addToCartBtn.addEventListener('click', () => {
             const qtd = parseInt(quantityInput.value) || 1;
-            const productToAdd = {
-                id: infoElement.dataset.productId,
-                name: infoElement.dataset.productName,
-                price: parseFloat(infoElement.dataset.productPrice),
+            const item = {
+                id: productInfoEl.dataset.productId,
+                name: productInfoEl.dataset.productName,
+                price: parseFloat(productInfoEl.dataset.productPrice),
                 quantity: qtd,
-                image: productData.image 
+                image: productData.image
             };
             
             let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            
-            const existingIndex = cart.findIndex(item => item.id === productToAdd.id);
-            if(existingIndex > -1) {
-                cart[existingIndex].quantity += qtd;
-            } else {
-                cart.push(productToAdd);
-            }
+            const idx = cart.findIndex(p => p.id === item.id);
+            if(idx > -1) cart[idx].quantity += qtd;
+            else cart.push(item);
 
             localStorage.setItem('cart', JSON.stringify(cart));
             if(modal) modal.style.display = 'flex';
         });
     }
-
-    if(continueShoppingBtn) {
-        continueShoppingBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-    }
+    if(continueShoppingBtn) continueShoppingBtn.addEventListener('click', () => modal.style.display = 'none');
 }
 
 function renderCartPage() {
-    const cartItemList = document.getElementById('cart-item-list');
+    const list = document.getElementById('cart-item-list');
     const subtotalEl = document.getElementById('subtotal');
     const totalEl = document.getElementById('total');
     
     const render = () => {
         const cart = JSON.parse(localStorage.getItem('cart')) || [];
-        cartItemList.innerHTML = '';
-
-        if (cart.length === 0) {
-            cartItemList.innerHTML = `<tr><td colspan="5" class="empty-cart-message"><p>Seu carrinho está vazio.</p><a href="loja.html" class="cta-button">Ver a Loja</a></td></tr>`;
+        list.innerHTML = '';
+        if(cart.length === 0) {
+            list.innerHTML = '<tr><td colspan="5" class="empty-cart-message"><p>Carrinho vazio.</p><a href="loja.html" class="cta-button">Ver Loja</a></td></tr>';
             if(subtotalEl) subtotalEl.textContent = 'R$ 0,00';
             if(totalEl) totalEl.textContent = 'R$ 0,00';
             return;
         }
 
-        let subtotal = 0;
-        cart.forEach((product, index) => {
-            const itemTotal = product.price * product.quantity;
-            subtotal += itemTotal;
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td><div class="product-info-cell"><img src="${product.image}" class="cart-item-image"><span>${product.name}</span></div></td>
-                <td>R$ ${product.price.toFixed(2).replace('.', ',')}</td>
-                <td><div class="quantity-selector"><button class="decrease-cart-quantity" data-index="${index}">-</button><input type="text" value="${product.quantity}" readonly><button class="increase-cart-quantity" data-index="${index}">+</button></div></td>
-                <td>R$ ${itemTotal.toFixed(2).replace('.', ',')}</td>
-                <td><button class="remove-btn" data-index="${index}">X</button></td>
+        let total = 0;
+        cart.forEach((p, i) => {
+            const sum = p.price * p.quantity;
+            total += sum;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><div class="product-info-cell"><img src="${p.image}" class="cart-item-image"><span>${p.name}</span></div></td>
+                <td>R$ ${p.price.toFixed(2).replace('.', ',')}</td>
+                <td><div class="quantity-selector"><button class="dec" data-i="${i}">-</button><input type="text" value="${p.quantity}" readonly><button class="inc" data-i="${i}">+</button></div></td>
+                <td>R$ ${sum.toFixed(2).replace('.', ',')}</td>
+                <td><button class="remove" data-i="${i}">X</button></td>
             `;
-            cartItemList.appendChild(row);
+            list.appendChild(tr);
         });
-        if(subtotalEl) subtotalEl.textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
-        if(totalEl) totalEl.textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+
+        if(subtotalEl) subtotalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        if(totalEl) totalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
     };
 
-    cartItemList.addEventListener('click', (event) => {
+    list.addEventListener('click', (e) => {
         const cart = JSON.parse(localStorage.getItem('cart')) || [];
-        const index = parseInt(event.target.dataset.index);
-
-        if (event.target.classList.contains('increase-cart-quantity')) cart[index].quantity++;
-        if (event.target.classList.contains('decrease-cart-quantity')) {
-            if (cart[index].quantity > 1) cart[index].quantity--;
-        }
-        if (event.target.classList.contains('remove-btn')) cart.splice(index, 1);
-
+        const i = e.target.dataset.i;
+        if(e.target.classList.contains('inc')) cart[i].quantity++;
+        if(e.target.classList.contains('dec') && cart[i].quantity > 1) cart[i].quantity--;
+        if(e.target.classList.contains('remove')) cart.splice(i, 1);
         localStorage.setItem('cart', JSON.stringify(cart));
         render();
     });
-
     render();
 }
 
 function renderCheckoutPage() {
+    const summary = document.getElementById('checkout-summary-items');
+    const totalEl = document.getElementById('checkout-total');
+    const whatsappBtn = document.getElementById('whatsapp-button');
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const checkoutTotalEl = document.getElementById('checkout-total');
-    const whatsappButton = document.getElementById('whatsapp-button');
-    const checkoutSummaryItems = document.getElementById('checkout-summary-items');
     
     let total = 0;
-    let whatsappMessage = 'Olá! Tenho interesse nos seguintes produtos:\n';
+    let msg = 'Olá! Tenho interesse nos seguintes produtos:\n';
+    summary.innerHTML = '';
 
-    checkoutSummaryItems.innerHTML = '';
-
-    if (cart.length === 0) {
-        checkoutSummaryItems.innerHTML = '<p style="text-align:center;">Seu carrinho está vazio.</p>';
-        if(whatsappButton) whatsappButton.style.display = 'none'; 
+    if(cart.length === 0) {
+        summary.innerHTML = '<p>Carrinho vazio.</p>';
+        if(whatsappBtn) whatsappBtn.style.display = 'none';
     } else {
-        cart.forEach(product => {
-            const itemTotal = product.price * product.quantity;
-            total += itemTotal;
-            
-            const summaryRow = document.createElement('div');
-            summaryRow.classList.add('summary-row');
-            summaryRow.innerHTML = `<span>${product.quantity}x ${product.name}</span><span>R$ ${itemTotal.toFixed(2).replace('.', ',')}</span>`;
-            checkoutSummaryItems.appendChild(summaryRow);
-            whatsappMessage += `- ${product.quantity}x ${product.name}\n`;
+        cart.forEach(p => {
+            const sum = p.price * p.quantity;
+            total += sum;
+            const div = document.createElement('div');
+            div.className = 'summary-row';
+            div.innerHTML = `<span>${p.quantity}x ${p.name}</span><span>R$ ${sum.toFixed(2).replace('.', ',')}</span>`;
+            summary.appendChild(div);
+            msg += `- ${p.quantity}x ${p.name}\n`;
         });
     }
-
-    if(checkoutTotalEl) checkoutTotalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-    whatsappMessage += `\nTotal: R$ ${total.toFixed(2).replace('.', ',')}`;
-
-    const numeroVendedor = '5538998838889';
-    if(whatsappButton) whatsappButton.href = `https://api.whatsapp.com/send?phone=${numeroVendedor}&text=${encodeURIComponent(whatsappMessage)}`;
+    
+    if(totalEl) totalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+    msg += `\nTotal: R$ ${total.toFixed(2).replace('.', ',')}`;
+    
+    if(whatsappBtn) whatsappBtn.href = `https://api.whatsapp.com/send?phone=5538998838889&text=${encodeURIComponent(msg)}`;
 }
