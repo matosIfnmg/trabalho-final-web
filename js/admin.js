@@ -146,34 +146,27 @@ async function setupProductForm(mode) {
     // --- 1. INTEGRAÇÃO UPLOADCARE + PREVIEW ---
     let widget = null;
     try {
-        // Inicializa o widget no input hidden
         widget = uploadcare.Widget('[role=uploadcare-uploader]');
         
-        // Quando o upload termina...
         widget.onUploadComplete(function(fileInfo) {
             if (fileInfo) {
-                // Pega a URL CDN do arquivo
                 currentImageUrl = fileInfo.cdnUrl; 
-                console.log("Upload concluído. URL:", currentImageUrl);
-                
-                // Atualiza o visual para o usuário ver que deu certo
                 if(previewContainer && previewImg) {
                     previewImg.src = currentImageUrl;
-                    previewContainer.style.display = 'block'; // Mostra a caixa
+                    previewContainer.style.display = 'block';
                 }
             }
         });
     } catch (e) {
-        console.warn("Uploadcare não carregou (verifique a internet).", e);
+        console.warn("Uploadcare não carregou corretamente.", e);
     }
 
-    // --- 2. SE FOR EDIÇÃO: CARREGAR DADOS EXISTENTES ---
+    // --- 2. SE FOR EDIÇÃO: CARREGAR DADOS ---
     let editId = null;
     if (mode === 'edit') {
         const params = new URLSearchParams(window.location.search);
         editId = params.get('id');
         
-        // Atualiza título (caso o HTML não tenha)
         const pageTitle = document.getElementById('page-title');
         if(pageTitle) pageTitle.textContent = 'Editar Produto';
 
@@ -187,15 +180,13 @@ async function setupProductForm(mode) {
                 document.getElementById('preco').value = product.price;
                 document.getElementById('estoque').value = product.stock || 0;
                 
-                // Define a imagem atual
-                currentImageUrl = product.image;
+                // --- CATEGORIA: Carrega o valor salvo ---
+                const catSelect = document.getElementById('categoria');
+                if(catSelect) catSelect.value = product.category || 'Geral';
                 
-                // Preenche o widget do Uploadcare com a imagem atual
-                if (widget && currentImageUrl) {
-                    widget.value(currentImageUrl); 
-                }
-
-                // Mostra o preview da imagem atual
+                // Imagem
+                currentImageUrl = product.image;
+                if (widget && currentImageUrl) widget.value(currentImageUrl);
                 if (currentImageUrl && previewContainer && previewImg) {
                     previewImg.src = currentImageUrl;
                     previewContainer.style.display = 'block';
@@ -207,7 +198,7 @@ async function setupProductForm(mode) {
         }
     }
 
-    // --- 3. AÇÃO DO BOTÃO SALVAR ---
+    // --- 3. SALVAR ---
     if (saveBtn) {
         saveBtn.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -220,18 +211,20 @@ async function setupProductForm(mode) {
                 return;
             }
 
-            // Se não tiver imagem nenhuma, coloca placeholder
             if (!currentImageUrl) {
                 currentImageUrl = 'https://placehold.co/400?text=Sem+Imagem';
             }
+
+            // --- PEGA A CATEGORIA SELECIONADA ---
+            const categoriaVal = document.getElementById('categoria') ? document.getElementById('categoria').value : 'Geral';
 
             const productData = {
                 name: nomeVal,
                 description: document.getElementById('descricao').value,
                 price: parseFloat(precoVal.replace(',', '.')),
                 stock: parseInt(document.getElementById('estoque').value) || 0,
-                image: currentImageUrl, // Manda a URL do Uploadcare para o banco
-                category: 'Geral'
+                image: currentImageUrl,
+                category: categoriaVal // Salva a categoria correta
             };
 
             try {
