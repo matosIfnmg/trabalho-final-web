@@ -1,7 +1,7 @@
 // js/admin.js
 
 const API_URL = 'https://back-end-tf-web-nu.vercel.app'; 
-const UPLOADCARE_KEY = '33e296cc27133dfa32a7'; // Chave pública para o botão manual
+const UPLOADCARE_KEY = '33e296cc27133dfa32a7'; // Chave pública
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -16,60 +16,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 2. LÓGICA DA PÁGINA DE LOGIN ---
     if (isLoginPage) {
-        const loginForm = document.getElementById('login-form') || document.querySelector('form');
-        
-        if (loginForm) {
-            loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault(); 
-                
-                const loginBtn = document.querySelector('.login-button');
-                const emailInput = document.getElementById('email');
-                const senhaInput = document.getElementById('senha');
-                
-                if(loginBtn) {
-                    loginBtn.textContent = 'Verificando...';
-                    loginBtn.disabled = true;
-                }
-
-                try {
-                    const response = await fetch(`${API_URL}/login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: emailInput.value, senha: senhaInput.value })
-                    });
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        localStorage.setItem('adminLoggedIn', 'true');
-                        window.location.href = 'index.html'; 
-                    } else {
-                        alert(data.error || 'Login inválido');
-                        if(loginBtn) { loginBtn.textContent = 'Entrar'; loginBtn.disabled = false; }
-                    }
-                } catch (error) {
-                    console.error(error);
-                    alert('Erro ao conectar com o servidor.');
-                    if(loginBtn) { loginBtn.textContent = 'Entrar'; loginBtn.disabled = false; }
-                }
-            });
-        }
+        setupLoginForm();
         return; 
     }
 
-    // Logout
-    const logoutLinks = document.querySelectorAll('a[href="login.html"]');
-    logoutLinks.forEach(link => {
+    // Logout e Menu Hambúrguer
+    document.querySelectorAll('a[href="login.html"]').forEach(link => {
         link.addEventListener('click', () => localStorage.removeItem('adminLoggedIn'));
     });
 
-    // Menu Hambúrguer
     const adminHamburger = document.querySelector('.admin-hamburger');
     const adminSidebar = document.getElementById('admin-sidebar');
     if(adminHamburger && adminSidebar) {
         adminHamburger.addEventListener('click', () => adminSidebar.classList.toggle('active'));
     }
 
-    // Rotas
+    // Roteamento
     if (window.location.pathname.includes('produtos.html')) fetchProductsTable();
     if (window.location.pathname.includes('adicionar-produto.html')) setupProductForm('create');
     if (window.location.pathname.includes('editar-produto.html')) setupProductForm('edit');
@@ -79,6 +41,43 @@ document.addEventListener('DOMContentLoaded', () => {
 // FUNÇÕES DO SISTEMA
 // ==========================================
 
+// --- FUNÇÃO DE LOGIN ISOLADA ---
+function setupLoginForm() {
+    const loginForm = document.getElementById('login-form') || document.querySelector('form');
+    if (!loginForm) return;
+
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); 
+        const loginBtn = document.querySelector('.login-button');
+        const emailInput = document.getElementById('email');
+        const senhaInput = document.getElementById('senha');
+        
+        if(loginBtn) { loginBtn.textContent = 'Verificando...'; loginBtn.disabled = true; }
+
+        try {
+            const response = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailInput.value, senha: senhaInput.value })
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('adminLoggedIn', 'true');
+                window.location.href = 'index.html'; 
+            } else {
+                alert(data.error || 'Login inválido');
+                if(loginBtn) { loginBtn.textContent = 'Entrar'; loginBtn.disabled = false; }
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Erro ao conectar com o servidor.');
+            if(loginBtn) { loginBtn.textContent = 'Entrar'; loginBtn.disabled = false; }
+        }
+    });
+}
+
+// --- LISTAGEM DE PRODUTOS ---
 async function fetchProductsTable() {
     const tbody = document.querySelector('tbody');
     if (!tbody) return;
@@ -137,46 +136,69 @@ async function deleteProduct(id) {
     }
 }
 
+// --- FORMULÁRIO DE PRODUTO (CRIAR/EDITAR) ---
 async function setupProductForm(mode) {
     const saveBtn = document.querySelector('.save-button');
-    const uploadBtn = document.getElementById('btn-upload'); // Botão Manual Novo
+    const uploadBtn = document.getElementById('btn-upload');
     const previewContainer = document.getElementById('image-preview-container');
     const previewImg = document.getElementById('image-preview');
     
     let currentImageUrl = ''; 
 
-    // --- 1. BOTÃO MANUAL DE UPLOAD (Corrige o travamento no celular) ---
+    // 1. UPLOAD MANUAL COM PROTEÇÃO PARA ANDROID
     if (uploadBtn) {
         uploadBtn.addEventListener('click', (e) => {
-            e.preventDefault(); // Evita recarregar a página
+            e.preventDefault();
             
-            // Abre o diálogo do Uploadcare manualmente
             uploadcare.openDialog(null, {
                 publicKey: UPLOADCARE_KEY,
                 imagesOnly: true,
                 tabs: 'file camera url facebook gdrive',
-                crop: 'free' // Opcional: permite cortar a imagem
+                crop: 'free'
             }).done(function(file) {
-                // Quando o usuário escolhe o arquivo
-                uploadBtn.textContent = 'Carregando...';
+                // AQUI ESTÁ A CORREÇÃO:
+                // Bloqueia o botão salvar imediatamente para evitar clique antes da hora
+                if(saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.textContent = 'Aguarde o upload...';
+                    saveBtn.style.opacity = '0.6';
+                }
+                uploadBtn.textContent = 'Enviando arquivo...';
                 
-                file.promise().done(function(fileInfo) {
-                    // Quando o upload termina
-                    currentImageUrl = fileInfo.cdnUrl;
-                    console.log('Upload concluído:', currentImageUrl);
-                    
-                    // Atualiza o preview
-                    if(previewContainer && previewImg) {
-                        previewImg.src = currentImageUrl;
-                        previewContainer.style.display = 'block';
-                    }
-                    uploadBtn.textContent = '✅ Foto Selecionada (Trocar)';
-                });
+                file.promise()
+                    .done(function(fileInfo) {
+                        // Sucesso: Atualiza URL e libera botão
+                        currentImageUrl = fileInfo.cdnUrl;
+                        console.log('Upload concluído:', currentImageUrl);
+                        
+                        if(previewContainer && previewImg) {
+                            previewImg.src = currentImageUrl;
+                            previewContainer.style.display = 'block';
+                        }
+                        uploadBtn.textContent = '✅ Foto Carregada!';
+                        
+                        // Libera o botão salvar
+                        if(saveBtn) {
+                            saveBtn.disabled = false;
+                            saveBtn.textContent = mode === 'edit' ? 'Salvar Alterações' : 'Salvar Produto';
+                            saveBtn.style.opacity = '1';
+                        }
+                    })
+                    .fail(function(error) {
+                        // Erro no upload
+                        alert("Erro ao enviar a imagem. Tente novamente.");
+                        uploadBtn.textContent = '📷 Tentar Novamente';
+                        if(saveBtn) {
+                            saveBtn.disabled = false;
+                            saveBtn.textContent = mode === 'edit' ? 'Salvar Alterações' : 'Salvar Produto';
+                            saveBtn.style.opacity = '1';
+                        }
+                    });
             });
         });
     }
 
-    // --- 2. SE FOR EDIÇÃO: CARREGAR DADOS EXISTENTES ---
+    // 2. CARREGAR DADOS NA EDIÇÃO
     let editId = null;
     if (mode === 'edit') {
         const params = new URLSearchParams(window.location.search);
@@ -202,7 +224,6 @@ async function setupProductForm(mode) {
                 // Imagem
                 currentImageUrl = product.image;
                 
-                // Se já tem imagem, mostra no preview e muda o texto do botão
                 if (currentImageUrl && previewContainer && previewImg) {
                     previewImg.src = currentImageUrl;
                     previewContainer.style.display = 'block';
@@ -215,7 +236,7 @@ async function setupProductForm(mode) {
         }
     }
 
-    // --- 3. AÇÃO DO BOTÃO SALVAR ---
+    // 3. SALVAR
     if (saveBtn) {
         saveBtn.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -233,7 +254,8 @@ async function setupProductForm(mode) {
                 currentImageUrl = 'https://placehold.co/400?text=Sem+Imagem';
             }
 
-            const categoriaVal = document.getElementById('categoria') ? document.getElementById('categoria').value : 'Geral';
+            // Pega Categoria com segurança (se o elemento não existir, usa Geral)
+            const categoriaVal = document.getElementById('categoria')?.value || 'Geral';
 
             const productData = {
                 name: nomeVal,
