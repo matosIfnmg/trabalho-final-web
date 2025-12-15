@@ -14,20 +14,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 2. FILTRO POR CATEGORIA (LOJA) ---
-    // Detecta cliques nos links de categoria da barra lateral
-    const categoryLinks = document.querySelectorAll('.filter-group ul li a');
-    
-    if (categoryLinks.length > 0) {
-        categoryLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault(); 
-                // Pega o nome da categoria clicada
-                const categoryName = e.target.textContent.trim();
-                // Recarrega os produtos com o filtro
-                loadProducts(categoryName);
+    // --- 2. FILTRO POR CATEGORIA DINÂMICO ---
+    // Procura a lista vazia no HTML para preencher
+    const categoryListEl = document.getElementById('dynamic-category-list');
+
+    if (categoryListEl) {
+        // Busca as categorias existentes no banco
+        fetch(`${BASE_API_URL}/categories`)
+            .then(res => res.json())
+            .then(categories => {
+                categoryListEl.innerHTML = ''; // Limpa o "Carregando..."
+                
+                // Botão "Todos"
+                const liAll = document.createElement('li');
+                liAll.innerHTML = `<a href="#">Todos</a>`;
+                liAll.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    loadProducts(); // Carrega tudo
+                });
+                categoryListEl.appendChild(liAll);
+
+                // Botões das Categorias do Banco
+                categories.forEach(cat => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<a href="#">${cat}</a>`;
+                    li.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        // Carrega filtrado
+                        loadProducts(cat); 
+                    });
+                    categoryListEl.appendChild(li);
+                });
+            })
+            .catch(err => {
+                console.error('Erro categorias:', err);
+                categoryListEl.innerHTML = '<li><small>Erro ao carregar</small></li>';
             });
-        });
     }
 
     // --- 3. CARREGAMENTO INICIAL ---
