@@ -5,35 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adicionar Produto - Painel Administrativo</title>
     <link rel="stylesheet" href="../css/admin-style.css">
-
-    <script>
-        // A configuração vai ser feita no JavaScript agora
-        const UPLOADCARE_PUBLIC_KEY = '33e296cc27133dfa32a7'; 
-    </script>
-    <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
-    
-    <style>
-        /* Estilo do nosso Botão Personalizado (Nunca trava) */
-        .custom-upload-btn {
-            background-color: #333;
-            color: #fff;
-            border: none;
-            padding: 15px;
-            width: 100%;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .custom-upload-btn:hover { background-color: #555; }
-        .custom-upload-btn:active { transform: scale(0.98); }
-    </style>
-</head>
+    </head>
 <body>
     <div class="admin-layout">
         <aside class="sidebar" id="admin-sidebar">
@@ -84,18 +56,16 @@
                         <div class="form-group">
                             <label>Imagem do Produto</label>
                             
-                            <button type="button" id="btn-upload" class="custom-upload-btn">
-                                📷 Escolher Foto
+                            <input type="file" id="file-input" accept="image/*" style="width:100%; padding: 10px; background: #fff; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 5px;">
+                            
+                            <button type="button" id="btn-upload-imgbb" style="width: 100%; padding: 10px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                ⬆️ Enviar Foto
                             </button>
 
                             <div id="image-preview-container" style="display: none; margin-top: 15px; text-align: center; background: #fff; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
                                 <p style="color: green; font-size: 14px; font-weight: bold; margin: 0 0 5px 0;">✅ Imagem Carregada!</p>
                                 <img id="image-preview" src="" alt="Pré-visualização" style="width: 100%; max-height: 200px; object-fit: contain; border-radius: 4px;">
                             </div>
-                            
-                            <p style="font-size: 12px; color: #777; margin-top: 5px; text-align: center;">
-                                Clique no botão para abrir a câmera ou galeria.
-                            </p>
                         </div>
     
                         <div class="form-group">

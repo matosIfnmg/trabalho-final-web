@@ -1,11 +1,10 @@
 // js/admin.js
 
 const API_URL = 'https://back-end-tf-web-nu.vercel.app'; 
-const UPLOADCARE_KEY = '33e296cc27133dfa32a7'; // Chave pública
+const IMGBB_API_KEY = '5b5aad6e4d902479434ab0d4bcb7d8f3'; // ✅ Sua Chave ImgBB
 
 document.addEventListener('DOMContentLoaded', () => {
-
-    // --- 1. VERIFICAÇÃO DE LOGIN ---
+    // 1. Verificação de Login
     const isLoginPage = window.location.pathname.includes('login.html');
     const isLoggedIn = localStorage.getItem('adminLoggedIn');
 
@@ -14,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // --- 2. LÓGICA DA PÁGINA DE LOGIN ---
     if (isLoginPage) {
         setupLoginForm();
         return; 
@@ -38,11 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.location.pathname.includes('editar-produto.html')) setupProductForm('edit');
 });
 
-// ==========================================
-// FUNÇÕES DO SISTEMA
-// ==========================================
-
-// --- FUNÇÃO DE LOGIN ---
+// --- LOGIN ---
 function setupLoginForm() {
     const loginForm = document.getElementById('login-form') || document.querySelector('form');
     if (!loginForm) return;
@@ -78,7 +72,7 @@ function setupLoginForm() {
     });
 }
 
-// --- LISTAGEM DE PRODUTOS ---
+// --- LISTAGEM ---
 async function fetchProductsTable() {
     const tbody = document.querySelector('tbody');
     if (!tbody) return;
@@ -137,69 +131,86 @@ async function deleteProduct(id) {
     }
 }
 
-// --- FORMULÁRIO DE PRODUTO (CRIAR/EDITAR) ---
+// --- FORMULÁRIO (IMGBB + SALVAR) ---
 async function setupProductForm(mode) {
     const saveBtn = document.querySelector('.save-button');
-    const uploadBtn = document.getElementById('btn-upload');
+    const uploadBtn = document.getElementById('btn-upload-imgbb');
+    const fileInput = document.getElementById('file-input');
     const previewContainer = document.getElementById('image-preview-container');
     const previewImg = document.getElementById('image-preview');
     
-    // Variável que guarda o link da imagem (Vazia no início ou preenchida na edição)
     let currentImageUrl = ''; 
 
-    // 1. UPLOAD MANUAL COM PROTEÇÃO PARA ANDROID & SUBSTITUIÇÃO
-    if (uploadBtn) {
-        uploadBtn.addEventListener('click', (e) => {
+    // 1. UPLOAD PARA O IMGBB
+    if (uploadBtn && fileInput) {
+        uploadBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            
-            uploadcare.openDialog(null, {
-                publicKey: UPLOADCARE_KEY,
-                imagesOnly: true,
-                tabs: 'file camera url facebook gdrive',
-                crop: 'free'
-            }).done(function(file) {
+
+            // Verifica se tem arquivo selecionado
+            if (fileInput.files.length === 0) {
+                alert("Por favor, selecione uma foto no campo acima primeiro.");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append("image", file);
+
+            // Feedback visual e bloqueio
+            uploadBtn.textContent = "Enviando...";
+            uploadBtn.disabled = true;
+            if(saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.textContent = "Aguarde o upload...";
+                saveBtn.style.opacity = "0.6";
+            }
+
+            try {
+                // Envia para API do ImgBB
+                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                    method: "POST",
+                    body: formData
+                });
                 
-                // BLOQUEIO DE SEGURANÇA: Impede salvar antes do upload terminar
-                if(saveBtn) {
-                    saveBtn.disabled = true;
-                    saveBtn.textContent = 'Aguarde o upload...';
-                    saveBtn.style.opacity = '0.6';
+                const data = await res.json();
+
+                if (data.success) {
+                    // SUCESSO!
+                    currentImageUrl = data.data.url;
+                    console.log("Upload ImgBB Sucesso:", currentImageUrl);
+
+                    // Atualiza Preview
+                    if (previewContainer && previewImg) {
+                        previewImg.src = currentImageUrl;
+                        previewContainer.style.display = 'block';
+                    }
+
+                    uploadBtn.textContent = "✅ Foto Carregada!";
+                    
+                    // Libera salvar
+                    if(saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.textContent = mode === 'edit' ? 'Salvar Alterações' : 'Salvar Produto';
+                        saveBtn.style.opacity = "1";
+                    }
+
+                } else {
+                    // ERRO DO IMGBB
+                    console.error("Erro ImgBB:", data);
+                    alert("Erro ao enviar imagem: " + (data.error ? data.error.message : "Desconhecido"));
+                    uploadBtn.textContent = "Tentar Novamente";
+                    uploadBtn.disabled = false;
+                    if(saveBtn) saveBtn.disabled = false;
                 }
-                uploadBtn.textContent = 'Enviando arquivo...';
-                
-                // Promessa do upload
-                file.promise()
-                    .done(function(fileInfo) {
-                        // SUCESSO:
-                        // 1. Atualiza a variável com o NOVO link (sobrescrevendo o antigo)
-                        currentImageUrl = fileInfo.cdnUrl;
-                        console.log('Nova imagem definida:', currentImageUrl);
-                        
-                        // 2. Mostra a nova imagem na tela imediatamente
-                        if(previewContainer && previewImg) {
-                            previewImg.src = currentImageUrl;
-                            previewContainer.style.display = 'block';
-                        }
-                        uploadBtn.textContent = '✅ Foto Carregada!';
-                        
-                        // 3. Libera o botão salvar
-                        if(saveBtn) {
-                            saveBtn.disabled = false;
-                            saveBtn.textContent = mode === 'edit' ? 'Salvar Alterações' : 'Salvar Produto';
-                            saveBtn.style.opacity = '1';
-                        }
-                    })
-                    .fail(function(error) {
-                        // ERRO:
-                        alert("Erro ao enviar a imagem. Tente novamente.");
-                        uploadBtn.textContent = '📷 Tentar Novamente';
-                        if(saveBtn) {
-                            saveBtn.disabled = false;
-                            saveBtn.textContent = mode === 'edit' ? 'Salvar Alterações' : 'Salvar Produto';
-                            saveBtn.style.opacity = '1';
-                        }
-                    });
-            });
+
+            } catch (error) {
+                // ERRO DE REDE
+                console.error(error);
+                alert("Erro de conexão ao enviar imagem.");
+                uploadBtn.textContent = "Tentar Novamente";
+                uploadBtn.disabled = false;
+                if(saveBtn) saveBtn.disabled = false;
+            }
         });
     }
 
@@ -222,18 +233,15 @@ async function setupProductForm(mode) {
                 document.getElementById('preco').value = product.price;
                 document.getElementById('estoque').value = product.stock || 0;
                 
-                // Categoria
                 const catSelect = document.getElementById('categoria');
                 if(catSelect) catSelect.value = product.category || 'Geral'; 
                 
-                // Imagem: Carrega a do banco
                 currentImageUrl = product.image;
                 
-                // Mostra a imagem do banco no preview
                 if (currentImageUrl && previewContainer && previewImg) {
                     previewImg.src = currentImageUrl;
                     previewContainer.style.display = 'block';
-                    if(uploadBtn) uploadBtn.textContent = '📷 Alterar Foto';
+                    if(uploadBtn) uploadBtn.textContent = '⬆️ Alterar Foto';
                 }
 
                 if(saveBtn) saveBtn.textContent = 'Salvar Alterações';
@@ -242,7 +250,7 @@ async function setupProductForm(mode) {
         }
     }
 
-    // 3. SALVAR
+    // 3. SALVAR NO BANCO
     if (saveBtn) {
         saveBtn.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -255,12 +263,11 @@ async function setupProductForm(mode) {
                 return;
             }
 
-            // Se não tiver imagem (nem antiga, nem nova), usa placeholder
+            // Se não tiver imagem, usa placeholder
             if (!currentImageUrl) {
                 currentImageUrl = 'https://placehold.co/400?text=Sem+Imagem';
             }
 
-            // Pega Categoria com segurança
             const categoriaVal = document.getElementById('categoria')?.value || 'Geral';
 
             const productData = {
@@ -268,7 +275,6 @@ async function setupProductForm(mode) {
                 description: document.getElementById('descricao').value,
                 price: parseFloat(precoVal.replace(',', '.')),
                 stock: parseInt(document.getElementById('estoque').value) || 0,
-                // Aqui vai a imagem correta (seja a que veio do banco ou a nova que foi upada)
                 image: currentImageUrl,
                 category: categoriaVal 
             };
