@@ -14,20 +14,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // --- 2. LÓGICA DA PÁGINA DE LOGIN (Corrigida para Botão/Formulário) ---
+    // --- 2. LÓGICA DA PÁGINA DE LOGIN ---
     if (isLoginPage) {
-        // Agora pegamos o FORMULÁRIO, não só o botão
         const loginForm = document.getElementById('login-form') || document.querySelector('form');
         
         if (loginForm) {
             loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault(); // Impede a página de recarregar
+                e.preventDefault(); 
                 
                 const loginBtn = document.querySelector('.login-button');
                 const emailInput = document.getElementById('email');
                 const senhaInput = document.getElementById('senha');
                 
-                // Feedback visual
                 if(loginBtn) {
                     loginBtn.textContent = 'Verificando...';
                     loginBtn.disabled = true;
@@ -37,46 +35,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     const response = await fetch(`${API_URL}/login`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            email: emailInput.value, 
-                            senha: senhaInput.value 
-                        })
+                        body: JSON.stringify({ email: emailInput.value, senha: senhaInput.value })
                     });
-
                     const data = await response.json();
 
                     if (response.ok) {
                         localStorage.setItem('adminLoggedIn', 'true');
-                        window.location.href = 'index.html'; // Agora sim redireciona
+                        window.location.href = 'index.html'; 
                     } else {
                         alert(data.error || 'Login inválido');
-                        if(loginBtn) {
-                            loginBtn.textContent = 'Entrar';
-                            loginBtn.disabled = false;
-                        }
+                        if(loginBtn) { loginBtn.textContent = 'Entrar'; loginBtn.disabled = false; }
                     }
                 } catch (error) {
-                    console.error('Erro:', error);
+                    console.error(error);
                     alert('Erro ao conectar com o servidor.');
-                    if(loginBtn) {
-                        loginBtn.textContent = 'Entrar';
-                        loginBtn.disabled = false;
-                    }
+                    if(loginBtn) { loginBtn.textContent = 'Entrar'; loginBtn.disabled = false; }
                 }
             });
         }
         return; 
-    }
-
-    // ... (O RESTO DO CÓDIGO CONTINUA IGUAL: Menu Hambúrguer, Logout, Produtos, etc.) ...
-    
-    // --- 3. MENU HAMBÚRGUER ---
-    const adminHamburger = document.querySelector('.admin-hamburger');
-    const adminSidebar = document.getElementById('admin-sidebar');
-    if(adminHamburger && adminSidebar) {
-        adminHamburger.addEventListener('click', () => {
-            adminSidebar.classList.toggle('active');
-        });
     }
 
     // Logout
@@ -85,22 +62,28 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', () => localStorage.removeItem('adminLoggedIn'));
     });
 
+    // Menu Hambúrguer
+    const adminHamburger = document.querySelector('.admin-hamburger');
+    const adminSidebar = document.getElementById('admin-sidebar');
+    if(adminHamburger && adminSidebar) {
+        adminHamburger.addEventListener('click', () => adminSidebar.classList.toggle('active'));
+    }
+
+    // Rotas
     if (window.location.pathname.includes('produtos.html')) fetchProductsTable();
     if (window.location.pathname.includes('adicionar-produto.html')) setupProductForm('create');
     if (window.location.pathname.includes('editar-produto.html')) setupProductForm('edit');
 });
 
-// ... (Mantenha as funções fetchProductsTable, deleteProduct e setupProductForm aqui embaixo) ...
-// (Copie as funções do código anterior se precisar, elas não mudaram)
 // ==========================================
-// FUNÇÕES DO SISTEMA (CRUD)
+// FUNÇÕES DO SISTEMA (COM UPLOADCARE)
 // ==========================================
 
 async function fetchProductsTable() {
     const tbody = document.querySelector('tbody');
     if (!tbody) return;
 
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Carregando produtos...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Carregando...</td></tr>';
 
     try {
         const response = await fetch(`${API_URL}/products`);
@@ -108,7 +91,7 @@ async function fetchProductsTable() {
         tbody.innerHTML = ''; 
 
         if(products.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum produto encontrado.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum produto.</td></tr>';
             return;
         }
         
@@ -119,7 +102,7 @@ async function fetchProductsTable() {
             tr.innerHTML = `
                 <td>
                     <div class="table-image-placeholder">
-                        <img src="${product.image}" alt="${product.name}" style="width:100%; height:100%; object-fit:cover; border-radius:5px;" onerror="this.src='../images/logo.png'">
+                        <img src="${product.image}" style="width:100%; height:100%; object-fit:cover; border-radius:5px;" onerror="this.src='../images/logo.png'">
                     </div>
                 </td>
                 <td>${product.name}</td>
@@ -134,12 +117,12 @@ async function fetchProductsTable() {
             tbody.appendChild(tr);
         });
     } catch (error) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Erro na API.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Erro na API.</td></tr>';
     }
 }
 
 async function deleteProduct(id) {
-    if (confirm('Tem certeza que deseja excluir este produto do banco de dados?')) {
+    if (confirm('Excluir este produto permanentemente?')) {
         try {
             const res = await fetch(`${API_URL}/products/${id}`, { method: 'DELETE' });
             if (res.ok) {
@@ -156,25 +139,35 @@ async function deleteProduct(id) {
 
 async function setupProductForm(mode) {
     const saveBtn = document.querySelector('.save-button');
-    const imgPlaceholder = document.querySelector('.image-upload-placeholder');
     let currentImageUrl = ''; 
-    
-    if (imgPlaceholder) {
-        imgPlaceholder.innerHTML = '<p style="font-size:12px; color:#555; text-align:center;">Clique para inserir o <strong>LINK</strong> da imagem</p>';
-        imgPlaceholder.addEventListener('click', () => {
-            const url = prompt('Cole o LINK (URL) da imagem aqui:', currentImageUrl);
-            if (url) {
-                currentImageUrl = url;
-                imgPlaceholder.innerHTML = `<img src="${url}" style="width:100%; height:100%; object-fit:contain;">`;
+
+    // --- INTEGRAÇÃO UPLOADCARE ---
+    // Inicializa o widget
+    let widget = null;
+    try {
+        widget = uploadcare.Widget('[role=uploadcare-uploader]');
+        
+        // Quando o upload terminar, salva a URL na variável
+        widget.onUploadComplete(function(fileInfo) {
+            if (fileInfo) {
+                currentImageUrl = fileInfo.cdnUrl; // Pega a URL CDN do Uploadcare
+                console.log("Imagem carregada:", currentImageUrl);
             }
         });
+    } catch (e) {
+        console.warn("Uploadcare não carregou corretamente (verifique a internet ou a chave pública).");
     }
 
+    // --- PREENCHER DADOS SE FOR EDIÇÃO ---
     let editId = null;
     if (mode === 'edit') {
         const params = new URLSearchParams(window.location.search);
         editId = params.get('id');
         
+        // Atualiza título da página
+        const pageTitle = document.getElementById('page-title');
+        if(pageTitle) pageTitle.textContent = 'Editar Produto';
+
         if (editId) {
             try {
                 const res = await fetch(`${API_URL}/products/${editId}`);
@@ -185,33 +178,45 @@ async function setupProductForm(mode) {
                 document.getElementById('preco').value = product.price;
                 document.getElementById('estoque').value = product.stock || 0;
                 
+                // Define a imagem atual no widget do Uploadcare para aparecer no preview
                 currentImageUrl = product.image;
-                if(imgPlaceholder && currentImageUrl) {
-                    imgPlaceholder.innerHTML = `<img src="${currentImageUrl}" style="width:100%; height:100%; object-fit:contain;">`;
+                if (widget && currentImageUrl) {
+                    widget.value(currentImageUrl);
                 }
+
                 if(saveBtn) saveBtn.textContent = 'Salvar Alterações';
 
             } catch (err) { alert('Erro ao carregar dados.'); }
         }
     }
 
+    // --- BOTÃO SALVAR ---
     if (saveBtn) {
         saveBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             
-            const productData = {
-                name: document.getElementById('nome').value,
-                description: document.getElementById('descricao').value,
-                price: parseFloat(document.getElementById('preco').value.replace(',', '.')),
-                stock: parseInt(document.getElementById('estoque').value),
-                image: currentImageUrl || 'https://placehold.co/400?text=Sem+Imagem',
-                category: 'Geral'
-            };
+            // Validações básicas
+            const nomeVal = document.getElementById('nome').value;
+            const precoVal = document.getElementById('preco').value;
 
-            if(!productData.name || !productData.price) {
-                alert('Nome e Preço são obrigatórios!');
+            if(!nomeVal || !precoVal) {
+                alert('Preencha pelo menos o Nome e o Preço!');
                 return;
             }
+
+            // Se não tiver imagem, usa uma padrão
+            if (!currentImageUrl) {
+                currentImageUrl = 'https://placehold.co/400?text=Sem+Imagem';
+            }
+
+            const productData = {
+                name: nomeVal,
+                description: document.getElementById('descricao').value,
+                price: parseFloat(precoVal.replace(',', '.')),
+                stock: parseInt(document.getElementById('estoque').value) || 0,
+                image: currentImageUrl, // Aqui vai a URL do Uploadcare
+                category: 'Geral'
+            };
 
             try {
                 saveBtn.textContent = 'Salvando...';
@@ -227,7 +232,7 @@ async function setupProductForm(mode) {
                 });
 
                 if (res.ok) {
-                    alert(mode === 'edit' ? 'Atualizado com sucesso!' : 'Criado com sucesso!');
+                    alert('Salvo com sucesso!');
                     window.location.href = 'produtos.html'; 
                 } else {
                     alert('Erro ao salvar.');
