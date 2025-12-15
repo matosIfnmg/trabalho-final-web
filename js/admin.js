@@ -1,7 +1,7 @@
 // js/admin.js
 
-// URL da API
 const API_URL = 'https://back-end-tf-web-nu.vercel.app'; 
+const UPLOADCARE_KEY = '33e296cc27133dfa32a7'; // Chave pública para o botão manual
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -139,29 +139,44 @@ async function deleteProduct(id) {
 
 async function setupProductForm(mode) {
     const saveBtn = document.querySelector('.save-button');
+    const uploadBtn = document.getElementById('btn-upload'); // Botão Manual Novo
     const previewContainer = document.getElementById('image-preview-container');
     const previewImg = document.getElementById('image-preview');
+    
     let currentImageUrl = ''; 
 
-    // --- 1. INTEGRAÇÃO UPLOADCARE + PREVIEW ---
-    let widget = null;
-    try {
-        widget = uploadcare.Widget('[role=uploadcare-uploader]');
-        
-        widget.onUploadComplete(function(fileInfo) {
-            if (fileInfo) {
-                currentImageUrl = fileInfo.cdnUrl; 
-                if(previewContainer && previewImg) {
-                    previewImg.src = currentImageUrl;
-                    previewContainer.style.display = 'block';
-                }
-            }
+    // --- 1. BOTÃO MANUAL DE UPLOAD (Corrige o travamento no celular) ---
+    if (uploadBtn) {
+        uploadBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // Evita recarregar a página
+            
+            // Abre o diálogo do Uploadcare manualmente
+            uploadcare.openDialog(null, {
+                publicKey: UPLOADCARE_KEY,
+                imagesOnly: true,
+                tabs: 'file camera url facebook gdrive',
+                crop: 'free' // Opcional: permite cortar a imagem
+            }).done(function(file) {
+                // Quando o usuário escolhe o arquivo
+                uploadBtn.textContent = 'Carregando...';
+                
+                file.promise().done(function(fileInfo) {
+                    // Quando o upload termina
+                    currentImageUrl = fileInfo.cdnUrl;
+                    console.log('Upload concluído:', currentImageUrl);
+                    
+                    // Atualiza o preview
+                    if(previewContainer && previewImg) {
+                        previewImg.src = currentImageUrl;
+                        previewContainer.style.display = 'block';
+                    }
+                    uploadBtn.textContent = '✅ Foto Selecionada (Trocar)';
+                });
+            });
         });
-    } catch (e) {
-        console.warn("Uploadcare não carregou corretamente.", e);
     }
 
-    // --- 2. SE FOR EDIÇÃO: CARREGAR DADOS ---
+    // --- 2. SE FOR EDIÇÃO: CARREGAR DADOS EXISTENTES ---
     let editId = null;
     if (mode === 'edit') {
         const params = new URLSearchParams(window.location.search);
@@ -180,16 +195,18 @@ async function setupProductForm(mode) {
                 document.getElementById('preco').value = product.price;
                 document.getElementById('estoque').value = product.stock || 0;
                 
-                // --- CATEGORIA: Carrega o valor salvo ---
+                // Categoria
                 const catSelect = document.getElementById('categoria');
-                if(catSelect) catSelect.value = product.category || 'Geral';
+                if(catSelect) catSelect.value = product.category || 'Geral'; 
                 
                 // Imagem
                 currentImageUrl = product.image;
-                if (widget && currentImageUrl) widget.value(currentImageUrl);
+                
+                // Se já tem imagem, mostra no preview e muda o texto do botão
                 if (currentImageUrl && previewContainer && previewImg) {
                     previewImg.src = currentImageUrl;
                     previewContainer.style.display = 'block';
+                    if(uploadBtn) uploadBtn.textContent = '📷 Alterar Foto';
                 }
 
                 if(saveBtn) saveBtn.textContent = 'Salvar Alterações';
@@ -198,7 +215,7 @@ async function setupProductForm(mode) {
         }
     }
 
-    // --- 3. SALVAR ---
+    // --- 3. AÇÃO DO BOTÃO SALVAR ---
     if (saveBtn) {
         saveBtn.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -211,11 +228,11 @@ async function setupProductForm(mode) {
                 return;
             }
 
+            // Se não tiver imagem, usa placeholder
             if (!currentImageUrl) {
                 currentImageUrl = 'https://placehold.co/400?text=Sem+Imagem';
             }
 
-            // --- PEGA A CATEGORIA SELECIONADA ---
             const categoriaVal = document.getElementById('categoria') ? document.getElementById('categoria').value : 'Geral';
 
             const productData = {
@@ -224,7 +241,7 @@ async function setupProductForm(mode) {
                 price: parseFloat(precoVal.replace(',', '.')),
                 stock: parseInt(document.getElementById('estoque').value) || 0,
                 image: currentImageUrl,
-                category: categoriaVal // Salva a categoria correta
+                category: categoriaVal 
             };
 
             try {
